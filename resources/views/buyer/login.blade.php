@@ -37,11 +37,7 @@
                 <span class="ms-2 text-sm text-gray-600">{{ __('Ingat saya') }}</span>
             </label>
         </div>
-
-        <div class="flex items-center justify-between mt-4">
-            <a class="text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" href="{{ route('password.request') }}">
-                {{ __('Lupa password?') }}
-            </a>
+     
 
             <div class="flex items-center space-x-3">
                 <a href="{{ route('buyer.register') }}" class="text-green-600 hover:text-green-700 text-sm">
