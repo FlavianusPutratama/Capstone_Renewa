@@ -58,12 +58,12 @@
             <h2 class="text-2xl font-bold mb-2">Klien Kami</h2>
             <p class="text-gray-600 mb-8">Terima Kasih Atas Kontribusi Anda Terhadap Pengembangan Energi Terbarukan di Indonesia</p>
             <div class="grid grid-cols-2 md:grid-cols-6 gap-8">
-                <div class="flex justify-center items-center"><img src="{{ asset('images/pertamina.png') }}" alt="Client 1" class="h-10"></div>
-                <div class="flex justify-center items-center"><img src="{{ asset('images/pertamina.png') }}" alt="Client 2" class="h-10"></div>
-                <div class="flex justify-center items-center"><img src="{{ asset('images/pertamina.png') }}" alt="Client 3" class="h-10"></div>
-                <div class="flex justify-center items-center"><img src="{{ asset('images/pertamina.png') }}" alt="Client 4" class="h-10"></div>
-                <div class="flex justify-center items-center"><img src="{{ asset('images/pertamina.png') }}" alt="Client 5" class="h-10"></div>
-                <div class="flex justify-center items-center"><img src="{{ asset('images/pertamina.png') }}" alt="Client 6" class="h-10"></div>
+                <div class="flex justify-center items-center"><img src="{{ asset('images/Pertamina Logo.png') }}" alt="Client 1" class="h-10"></div>
+                <div class="flex justify-center items-center"><img src="{{ asset('images/Indofood Logo.png') }}" alt="Client 2" class="h-10"></div>
+                <div class="flex justify-center items-center"><img src="{{ asset('images/Pama Logo.png') }}" alt="Client 3" class="h-10"></div>
+                <div class="flex justify-center items-center"><img src="{{ asset('images/Telkom Logo.png') }}" alt="Client 4" class="h-10"></div>
+                <div class="flex justify-center items-center"><img src="{{ asset('images/MRT Jakarta Logo.png') }}" alt="Client 5" class="h-10"></div>
+                <div class="flex justify-center items-center"><img src="{{ asset('images/Mandiri Logo.png') }}" alt="Client 6" class="h-10"></div>
             </div>
         </div>
     </section>
