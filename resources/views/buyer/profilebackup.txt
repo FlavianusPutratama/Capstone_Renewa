@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Renewa - Solusi Energi Terbarukan</title>
+    <meta name="description" content="Platform Renewable Energy Certificate untuk mendukung energi bersih di Indonesia">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <nav class="bg-white shadow-sm py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center space-x-10">
+                <a href="/" class="font-bold text-xl text-gray-800">Renewa</a>
+                <div class="hidden md:flex space-x-6">
+                    <a href="{{ route('welcome') }}" class="text-gray-600 hover:text-green-500">Beranda</a>
+                    <a href="{{ route('generatormap') }}" class="text-gray-600 hover:text-green-500">Peta Pembangkit</a>
+                    <a href="#" class="text-gray-600 hover:text-green-500">Beli REC</a>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                @auth
+                    @php
+                        $hour = now()->format('H');
+                        $greeting = '';
+    
+                        if ($hour >= '01:00' && $hour <= '10:00') {
+                            $greeting = 'Pagi';
+                        } elseif ($hour >= '10:01' && $hour <= '14:30') {
+                            $greeting = 'Siang';
+                        } elseif ($hour >= '14:31' && $hour <= '18:00') {
+                            $greeting = 'Sore';
+                        } else {
+                            $greeting = 'Malam';
+                        }
+                    @endphp
+                    <a href="{{ route('buyer.categoryselect') }}" class="text-green-600 hover:text-green-700">
+                        {{ $greeting }}, {{ Auth::user()->name }}!
+                    </a>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">Logout</button>
+                    </form>
+                @else
+                    <a href="{{ route('buyer.login') }}" class="text-green-600 hover:text-green-700">Masuk</a>
+                    <a href="{{ route('buyer.register') }}" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">Daftar</a>
+                @endauth
+            </div>
+        </div>
+    </nav>
+
+    <main class="py-12">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-white shadow-md rounded-lg p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-700">Profil <i class="fas fa-user"></i></h2>
+                    <button id="editButton" class="text-gray-500"><i class="fas fa-edit"></i></button>
+                </div>
+                <form id="profileForm" action="{{ route('profile.update') }}" method="POST">
+                    @csrf
+                    @method('POST')
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-gray-700">Nama</label>
+                            <input type="text" name="name" class="w-full mt-1 p-2 border rounded" value="{{ $user->name }}" disabled>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700">Alamat</label>
+                            <input type="text" name="address" class="w-full mt-1 p-2 border rounded" value="{{ $user->address }}" disabled>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700">Email</label>
+                            <input type="email" name="email" class="w-full mt-1 p-2 border rounded" value="{{ $user->email }}" disabled>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700">Provinsi</label>
+                            <input type="text" name="province" class="w-full mt-1 p-2 border rounded" value="{{ $user->province }}" disabled>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700">No. Telepon</label>
+                            <input type="text" name="phone" class="w-full mt-1 p-2 border rounded" value="{{ $user->phone }}" disabled>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700">Kabupaten/Kota</label>
+                            <input type="text" name="regency" class="w-full mt-1 p-2 border rounded" value="{{ $user->regency }}" disabled>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700">NIK</label>
+                            <input type="text" name="nik" class="w-full mt-1 p-2 border rounded" value="{{ $user->nik }}" disabled>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700">Kecamatan</label>
+                            <input type="text" name="district" class="w-full mt-1 p-2 border rounded" value="{{ $user->district }}" disabled>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700">Kelurahan</label>
+                            <input type="text" name="village" class="w-full mt-1 p-2 border rounded" value="{{ $user->village }}" disabled>
+                        </div>
+                    </div>
+                    <div class="mt-6">
+                        <a href="{{ route('welcome') }}" class="text-green-500">Ubah Password</a>
+                    </div>
+                    <div class="mt-6 hidden" id="saveButtonContainer">
+                        <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded w-full flex items-center justify-center">
+                            <i class="fas fa-save mr-2"></i> Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('editButton').addEventListener('click', function() {
+            const inputs = document.querySelectorAll('#profileForm input');
+            inputs.forEach(input => {
+                input.disabled = !input.disabled;
+            });
+            document.getElementById('saveButtonContainer').classList.toggle('hidden');
+        });
+
+        document.getElementById('profileForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Mencegah pengiriman formulir default
+
+            const formData = new FormData(this);
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Tindakan setelah berhasil menyimpan
+                if (data.success) {
+                    alert('Profil berhasil diperbarui.');
+                    location.reload(); // Refresh halaman setelah notifikasi berhasil
+                } else {
+                    alert('Terjadi kesalahan saat menyimpan profil. Silakan coba lagi.');
+                }
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+                // Hapus alert error di sini
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,21 +1,15 @@
 <?php
-//routes\web.php
-
-namespace routes\web;
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Buyer\AuthController as BuyerAuthController;
 use App\Http\Controllers\Issuer\AuthController as IssuerAuthController;
-use App\Http\Middleware\CheckRole;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
 // Buyer Authentication Routes
-// web.php
 Route::middleware('guest')->group(function () {
     Route::get('/buyer/login', [BuyerAuthController::class, 'showLoginForm'])->name('buyer.login');
     Route::post('/buyer/login', [BuyerAuthController::class, 'login']);
@@ -24,18 +18,10 @@ Route::middleware('guest')->group(function () {
 });
 
 // Protected Buyer Routes
-Route::middleware(['auth', 'App\Http\Middleware\CheckRole:buyer'])->prefix('buyer')->group(function () {
+Route::middleware(['auth', 'role:buyer'])->prefix('buyer')->group(function () {
     Route::get('/checkout', function () {
         return view('buyer.checkout');
     })->name('buyer.checkout');
-
-    Route::get('/categoryselect', function () {
-        return view('buyer.categoryselect');
-    })->name('buyer.categoryselect');
-
-    // Rute profil pengguna
-    Route::get('/profile', [BuyerAuthController::class, 'showProfile'])->name('profile.show');
-    Route::post('/profile', [BuyerAuthController::class, 'updateProfile'])->name('profile.update');
 });
 
 // Issuer Authentication Routes
@@ -73,6 +59,11 @@ Route::get('/terms', function () {
 Route::get('/generatormap', function () {
     return view('generatormap');
 })->name('generatormap');
+
+// Categoryselect Route
+Route::get('/buyer/categoryselect', function () {
+    return view('buyer.categoryselect');
+})->name('categoryselect');
 
 // Welcome Page Route
 Route::get('/welcome', function () {

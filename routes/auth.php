@@ -56,4 +56,8 @@ Route::middleware('auth')->group(function () {
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
+    
+    // Route Show & Update from Profile Page
+    Route::get('profile', [BuyerAuthController::class, 'showProfile'])->name('profile.show');
+    Route::put('profile', [BuyerAuthController::class, 'updateProfile'])->name('profile.update');
 });

@@ -68,6 +68,9 @@
                 <x-input-label for="province" :value="__('Provinsi')" />
                 <select id="province" name="province" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring focus:ring-green-500 focus:ring-opacity-50" required>
                     <option value="">Pilih Provinsi</option>
+                    <option value="Jawa Barat">Jawa Barat</option>
+                    <option value="Jawa Tengah">Jawa Tengah</option>
+                    <option value="Jawa Timur">Jawa Timur</option>
                 </select>
                 <x-input-error :messages="$errors->get('province')" class="mt-2" />
             </div>
@@ -129,79 +132,141 @@
     </form>
 
     <script>
-        // Fetch provinces
-        fetch('https://flavianusputratama.github.io/api-wilayah-indonesia/api/provinces.json')
-            .then(response => response.json())
-            .then(provinces => {
-                const provinceSelect = document.getElementById('province');
-                provinces.forEach(province => {
-                    const option = document.createElement('option');
-                    option.value = province.id; // Simpan ID provinsi
-                    option.textContent = province.name; // Tampilkan nama provinsi
-                    provinceSelect.appendChild(option);
-                });
-            });
+        const regencies = {
+            'Jawa Barat': {
+                '1': {
+                    name: 'Bandung',
+                    districts: {
+                        '1': { name: 'Cimahi', villages: ['Cimahi', 'Cileunyi'] },
+                        '2': { name: 'Cibiru', villages: ['Cibiru', 'Cimahi Selatan'] }
+                    }
+                },
+                '2': {
+                    name: 'Bogor',
+                    districts: {
+                        '1': { name: 'Cibinong', villages: ['Cibinong', 'Cileungsi'] },
+                        '2': { name: 'Cisarua', villages: ['Cisarua', 'Ciawi'] }
+                    }
+                },
+                '3': {
+                    name: 'Depok',
+                    districts: {
+                        '1': { name: 'Cinere', villages: ['Cinere', 'Gandul', 'Pangkalan Jati'] },
+                        '2': { name: 'Limo', villages: ['Limo', 'Tapos'] }
+                    }
+                }
+            },
+            'Jawa Tengah': {
+                '1': {
+                    name: 'Semarang',
+                    districts: {
+                        '1': { name: 'Semarang Selatan', villages: ['Semarang Selatan', 'Semarang Utara'] },
+                        '2': { name: 'Tembalang', villages: ['Tembalang', 'Pedurungan'] }
+                    }
+                },
+                '2': {
+                    name: 'Solo',
+                    districts: {
+                        '1': { name: 'Banjarsari', villages: ['Banjarsari', 'Laweyan'] },
+                        '2': { name: 'Jebres', villages: ['Jebres', 'Serengan'] }
+                    }
+                }
+            },
+            'Jawa Timur': {
+                '1': {
+                    name: 'Surabaya',
+                    districts: {
+                        '1': { name: 'Gubeng', villages: ['Gubeng', 'Tegalsari'] },
+                        '2': { name: 'Sukolilo', villages: ['Sukolilo', 'Rungkut'] }
+                    }
+                },
+                '2': {
+                    name: 'Malang',
+                    districts: {
+                        '1': { name: 'Klojen', villages: ['Klojen', 'Lowokwaru'] },
+                        '2': { name: 'Blimbing', villages: ['Blimbing', 'Sukun'] }
+                    }
+                }
+            },
+            'DKI Jakarta': {
+                '1': {
+                    name: 'Jakarta Selatan',
+                    districts: {
+                        '1': { name: 'Kebayoran Baru', villages: ['Senopati', 'Gandaria'] },
+                        '2': { name: 'Pancoran', villages: ['Duren Tiga', 'Kalibata'] }
+                    }
+                },
+                '2': {
+                    name: 'Jakarta Timur',
+                    districts: {
+                        '1': { name: 'Duren Sawit', villages: ['Pondok Bambu', 'Klender'] },
+                        '2': { name: 'Matraman', villages: ['Utankayu', 'Pal Meriam'] }
+                    }
+                }
+            }
+        };
 
-        // Event listener for province change
         document.getElementById('province').addEventListener('change', function() {
-            const provinceId = this.value;
+            const province = this.value;
             const regencySelect = document.getElementById('regency');
             regencySelect.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
-            document.getElementById('district').innerHTML = '<option value="">Pilih Kecamatan</option>';
-            document.getElementById('village').innerHTML = '<option value="">Pilih Kelurahan</option>'; // Reset villages
 
-            if (provinceId) {
-                fetch(`https://flavianusputratama.github.io/api-wilayah-indonesia/api/regencies/${provinceId}.json`)
-                    .then(response => response.json())
-                    .then(regencies => {
-                        regencies.forEach(regency => {
-                            const option = document.createElement('option');
-                            option.value = regency.id; // Simpan ID kabupaten/kota
-                            option.textContent = regency.name; // Tampilkan nama kabupaten/kota
-                            regencySelect.appendChild(option);
-                        });
-                    });
+            if (province) {
+                const regencyData = regencies[province];
+                for (const [key, value] of Object.entries(regencyData)) {
+                    const option = document.createElement('option');
+                    option.value = value.name;
+                    option.textContent = value.name;
+                    regencySelect.appendChild(option);
+                }
             }
+            document.getElementById('district').innerHTML = '<option value="">Pilih Kecamatan</option>';
+            document.getElementById('village').innerHTML = '<option value="">Pilih Kelurahan</option>';
         });
 
-        // Event listener for regency change
         document.getElementById('regency').addEventListener('change', function() {
-            const regencyId = this.value;
+            const province = document.getElementById('province').value;
+            const regencyName = this.value;
             const districtSelect = document.getElementById('district');
             districtSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
-            document.getElementById('village').innerHTML = '<option value="">Pilih Kelurahan</option>'; // Reset villages
 
-            if (regencyId) {
-                fetch(`https://flavianusputratama.github.io/api-wilayah-indonesia/api/districts/${regencyId}.json`)
-                    .then(response => response.json())
-                    .then(districts => {
-                        districts.forEach(district => {
-                            const option = document.createElement('option');
-                            option.value = district.id; // Simpan ID kecamatan
-                            option.textContent = district.name; // Tampilkan nama kecamatan
-                            districtSelect.appendChild(option);
-                        });
-                    });
+            if (province) {
+                const regencyData = Object.entries(regencies[province]).find(([key, value]) => value.name === regencyName);
+                if (regencyData) {
+                    const districtData = regencyData[1].districts;
+                    for (const [key, value] of Object.entries(districtData)) {
+                        const option = document.createElement('option');
+                        option.value = value.name; // Store name for district
+                        option.textContent = value.name; // Display name
+                        districtSelect.appendChild(option);
+                    }
+                }
             }
+            document.getElementById('village').innerHTML = '<option value="">Pilih Kelurahan</option>'; // Reset villages
         });
 
-        // Event listener for district change
         document.getElementById('district').addEventListener('change', function() {
-            const districtId = this.value;
+            const province = document.getElementById('province').value;
+            const regencyName = document.getElementById('regency').value;
+            const districtName = this.value;
             const villageSelect = document.getElementById('village');
             villageSelect.innerHTML = '<option value="">Pilih Kelurahan</option>'; // Reset options
 
-            if (districtId) {
-                fetch(`https://flavianusputratama.github.io/api-wilayah-indonesia/api/villages/${districtId}.json`)
-                    .then(response => response.json())
-                    .then(villages => {
+            if (province && regencyName && districtName) {
+                const regencyData = Object.entries(regencies[province]).find(([key, value]) => value.name === regencyName);
+                if (regencyData) {
+                    const districtData = regencyData[1].districts;
+                    const selectedDistrict = Object.entries(districtData).find(([key, value]) => value.name === districtName);
+                    if (selectedDistrict) {
+                        const villages = selectedDistrict[1].villages;
                         villages.forEach(village => {
                             const option = document.createElement('option');
-                            option.value = village.id; // Simpan ID kelurahan
-                            option.textContent = village.name; // Tampilkan nama kelurahan
+                            option.value = village; // Store village name
+                            option.textContent = village; // Display village name
                             villageSelect.appendChild(option);
                         });
-                    });
+                    }
+                }
             }
         });
     </script>

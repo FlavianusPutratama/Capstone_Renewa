@@ -15,6 +15,13 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('phone')->nullable(); // Phone field
+            $table->string('nik')->nullable(); // NIK field
+            $table->string('address')->nullable(); // Address field
+            $table->string('province')->nullable(); // Store province name
+            $table->string('regency')->nullable(); // Store regency name
+            $table->string('district')->nullable(); // Store district name
+            $table->string('village')->nullable(); // Village field
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
