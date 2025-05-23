@@ -1,11 +1,12 @@
 <?php
-//routes\web.php
+// routes\web.php
 
 namespace routes\web;
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Buyer\AuthController as BuyerAuthController;
 use App\Http\Controllers\Issuer\AuthController as IssuerAuthController;
+use App\Http\Controllers\Buyer\MarketplaceController; // Pastikan ini adalah kelas yang benar
 use App\Http\Middleware\CheckRole;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +16,6 @@ Route::get('/', function () {
 });
 
 // Buyer Authentication Routes
-// web.php
 Route::middleware('guest')->group(function () {
     Route::get('/buyer/login', [BuyerAuthController::class, 'showLoginForm'])->name('buyer.login');
     Route::post('/buyer/login', [BuyerAuthController::class, 'login']);
@@ -33,9 +33,14 @@ Route::middleware(['auth', 'App\Http\Middleware\CheckRole:buyer'])->prefix('buye
         return view('buyer.categoryselect');
     })->name('buyer.categoryselect');
 
+    Route::get('/dashboard', function () {
+        return view('dashboard'); // file resources/views/dashboard.blade.php sudah ada
+    })->name('dashboard');
+
     // Rute profil pengguna
     Route::get('/profile', [BuyerAuthController::class, 'showProfile'])->name('profile.show');
     Route::post('/profile', [BuyerAuthController::class, 'updateProfile'])->name('profile.update');
+    Route::get('/profile/edit', [BuyerAuthController::class, 'showProfile'])->name('profile.edit');
 });
 
 // Issuer Authentication Routes
@@ -73,6 +78,9 @@ Route::get('/terms', function () {
 Route::get('/generatormap', function () {
     return view('generatormap');
 })->name('generatormap');
+
+// Marketplace Route
+Route::match(['get', 'post'], '/buyer/marketplace', [MarketplaceController::class, 'index'])->name('marketplace');
 
 // Welcome Page Route
 Route::get('/welcome', function () {

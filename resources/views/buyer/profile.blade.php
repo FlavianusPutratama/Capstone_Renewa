@@ -23,20 +23,20 @@
             <div class="flex items-center space-x-4">
                 @auth
                     @php
-                        $hour = now()->format('H');
-                        $greeting = '';
-    
-                        if ($hour >= '01:00' && $hour <= '10:00') {
+                        date_default_timezone_set('Asia/Bangkok');
+                        $currentTime = date('H:i');
+                        
+                        if ($currentTime >= '01:00' && $currentTime < '10:00') {
                             $greeting = 'Pagi';
-                        } elseif ($hour >= '10:01' && $hour <= '14:30') {
+                        } elseif ($currentTime >= '10:00' && $currentTime < '14:30') {
                             $greeting = 'Siang';
-                        } elseif ($hour >= '14:31' && $hour <= '18:00') {
+                        } elseif ($currentTime >= '14:30' && $currentTime < '18:00') {
                             $greeting = 'Sore';
                         } else {
                             $greeting = 'Malam';
                         }
                     @endphp
-                    <a href="{{ route('buyer.categoryselect') }}" class="text-green-600 hover:text-green-700">
+                    <a href="{{ route('profile.show') }}" class="text-green-600 hover:text-green-700">
                         {{ $greeting }}, {{ Auth::user()->name }}!
                     </a>
                     <form method="POST" action="{{ route('logout') }}">

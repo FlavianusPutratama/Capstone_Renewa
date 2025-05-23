@@ -8,8 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
-<body class="bg-gray-50">
-    <nav class="bg-white shadow-sm py-4">
+<body class="bg-gradient-to-br from-green-50 via-white to-green-100">
+    <nav class="bg-white shadow-sm py-4 mb-4">
         <div class="container mx-auto px-4 flex justify-between items-center">
             <div class="flex items-center space-x-10">
                 <a href="/" class="font-bold text-xl text-gray-800">Renewa</a>
@@ -67,6 +67,7 @@
         @endauth
     </main>
 
+    <!-- Footer -->
     <footer class="bg-gray-800 text-white py-12">
         <div class="container mx-auto px-4">
             <div class="flex flex-col md:flex-row justify-between">
@@ -122,6 +123,3 @@
             </div>
         </div>
     </footer>
-    <script src="{{ asset('js/app.js') }}"></script>
-</body>
-</html>
