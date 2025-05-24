@@ -3,55 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Renewa - Solusi Energi Terbarukan</title>
-    <meta name="description" content="Platform Renewable Energy Certificate untuk mendukung energi bersih di Indonesia">
+    <title>Renewa - Profil Pengguna</title>
+    <meta name="description" content="Kelola profil dan informasi akun Anda di platform Renewa">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    @vite('resources/css/app.css')
+    
+    <!-- AOS CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* Custom smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Custom animations untuk elemen yang belum terlihat */
+        [data-aos] {
+            pointer-events: none;
+        }
+        
+        [data-aos].aos-animate {
+            pointer-events: auto;
+        }
+        
+        /* Navbar scroll effect */
+        .navbar-scrolled {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+        }
+    </style>
 </head>
 <body class="bg-gray-50">
-    <nav class="bg-white shadow-sm py-4">
-        <div class="container mx-auto px-4 flex justify-between items-center">
-            <div class="flex items-center space-x-10">
-                <a href="/" class="font-bold text-xl text-gray-800">Renewa</a>
-                <div class="hidden md:flex space-x-6">
-                    <a href="{{ route('welcome') }}" class="text-gray-600 hover:text-green-500">Beranda</a>
-                    <a href="{{ route('generatormap') }}" class="text-gray-600 hover:text-green-500">Peta Pembangkit</a>
-                    <a href="#" class="text-gray-600 hover:text-green-500">Beli REC</a>
-                </div>
-            </div>
-            <div class="flex items-center space-x-4">
-                @auth
-                    @php
-                        date_default_timezone_set('Asia/Bangkok');
-                        $currentTime = date('H:i');
-                        
-                        if ($currentTime >= '01:00' && $currentTime < '10:00') {
-                            $greeting = 'Pagi';
-                        } elseif ($currentTime >= '10:00' && $currentTime < '14:30') {
-                            $greeting = 'Siang';
-                        } elseif ($currentTime >= '14:30' && $currentTime < '18:00') {
-                            $greeting = 'Sore';
-                        } else {
-                            $greeting = 'Malam';
-                        }
-                    @endphp
-                    <a href="{{ route('profile.show') }}" class="text-green-600 hover:text-green-700">
-                        {{ $greeting }}, {{ Auth::user()->name }}!
-                    </a>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">Logout</button>
-                    </form>
-                @else
-                    <a href="{{ route('buyer.login') }}" class="text-green-600 hover:text-green-700">Masuk</a>
-                    <a href="{{ route('buyer.register') }}" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">Daftar</a>
-                @endauth
-            </div>
-        </div>
-    </nav>
+    @include('layouts.partials.navbar')
 
-    <main class="py-12">
+    <main class="py-12 pt-24">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white shadow-md rounded-lg p-6">
                 <div class="flex justify-between items-center mb-6">
@@ -123,7 +115,30 @@
         </div>
     </main>
 
+    <!-- AOS JavaScript -->
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    
     <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true,
+            mirror: false,
+            offset: 50,
+            delay: 0,
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('navbar-scrolled');
+            } else {
+                navbar.classList.remove('navbar-scrolled');
+            }
+        });
+
         const regencies = {
             jabar: {
                 '1': { name: 'Bandung', districts: { '1': ['Cimahi', 'Cileunyi'], '2': ['Cibiru', 'Cimahi Selatan'] } },
