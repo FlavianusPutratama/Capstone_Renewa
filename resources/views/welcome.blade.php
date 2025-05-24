@@ -5,13 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Renewa - Solusi Energi Terbarukan</title>
     <meta name="description" content="Platform Renewable Energy Certificate untuk mendukung energi bersih di Indonesia">
+    <script src="https://cdn.tailwindcss.com"></script>
     @vite('resources/css/app.css')
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <!-- AOS CSS -->
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
         /* Custom smooth scrolling */
@@ -19,22 +18,13 @@
             scroll-behavior: smooth;
         }
         
-        /* Navbar scroll effect */
-        .navbar-scrolled {
-            backdrop-filter: blur(15px);
-            background-color: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+        /* Custom animations untuk elemen yang belum terlihat */
+        [data-aos] {
+            pointer-events: none;
         }
         
-        /* Custom hover effects */
-        .hover-lift {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .hover-lift:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        [data-aos].aos-animate {
+            pointer-events: auto;
         }
         
         /* Loading animation untuk hero */
@@ -51,81 +41,32 @@
             }
         }
         
-        /* Custom animations untuk elemen yang belum terlihat */
-        [data-aos] {
-            pointer-events: none;
+        /* Custom hover effects */
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         
-        [data-aos].aos-animate {
-            pointer-events: auto;
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Navbar scroll effect */
+        .navbar-scrolled {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
         }
     </style>
 </head>
 <body class="bg-gray-50">
-    <nav class="bg-white/80 backdrop-blur-md shadow-lg py-4 fixed w-full top-0 z-50 transition-all duration-300" id="navbar">
-        <div class="container mx-auto px-4 flex justify-between items-center">
-            <div class="flex items-center space-x-10">
-                <a href="/" class="font-bold text-2xl bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent" data-aos="fade-right" data-aos-duration="800">
-                    <i class="fas fa-leaf mr-2"></i>Renewa
-                </a>
-                <div class="hidden md:flex space-x-8">
-                    <a href="{{ route('welcome') }}" class="text-green-600 font-semibold border-b-2 border-green-600" data-aos="fade-down" data-aos-delay="100">
-                        <i class="fas fa-home mr-1"></i>Beranda
-                    </a>
-                    <a href="{{ route('generatormap') }}" class="text-gray-700 hover:text-green-600 font-medium transition-all duration-300 hover:scale-105" data-aos="fade-down" data-aos-delay="200">
-                        <i class="fas fa-map-marked-alt mr-1"></i>Peta Pembangkit
-                    </a>
-                    <a href="#" class="text-gray-700 hover:text-green-600 font-medium transition-all duration-300 hover:scale-105" data-aos="fade-down" data-aos-delay="300">
-                        <i class="fas fa-shopping-cart mr-1"></i>Beli REC
-                    </a>
-                </div>
-            </div>
-            <div class="flex items-center space-x-4">
-                @auth
-                    @php
-                        date_default_timezone_set('Asia/Bangkok');
-                        $currentTime = date('H:i');
-                        
-                        if ($currentTime >= '01:00' && $currentTime < '10:00') {
-                            $greeting = 'Sore';
-                            $icon = 'fa-sun';
-                        } elseif ($currentTime >= '10:00' && $currentTime < '14:30') {
-                            $greeting = 'Siang';
-                            $icon = 'fa-sun';
-                        } elseif ($currentTime >= '14:30' && $currentTime < '18:00') {
-                            $greeting = 'Sore';
-                            $icon = 'fa-cloud-sun';
-                        } else {
-                            $greeting = 'Sore';
-                            $icon = 'fa-moon';
-                        }
-                    @endphp
-                    <a href="{{ route('profile.show') }}" class="text-green-600 hover:text-green-700 font-medium transition-all duration-300 flex items-center" data-aos="fade-left" data-aos-delay="100">
-                        <i class="fas {{ $icon }} mr-2"></i>{{ $greeting }}, {{ Auth::user()->name }}!
-                    </a>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-2 rounded-full font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg" data-aos="fade-left" data-aos-delay="200">
-                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
-                        </button>
-                    </form>
-                @else
-                    <a href="{{ route('buyer.login') }}" class="text-green-600 hover:text-green-700 font-medium transition-all duration-300" data-aos="fade-left" data-aos-delay="100">
-                        <i class="fas fa-sign-in-alt mr-1"></i>Masuk
-                    </a>
-                    <a href="{{ route('buyer.register') }}" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-2 rounded-full font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg" data-aos="fade-left" data-aos-delay="200">
-                        <i class="fas fa-user-plus mr-1"></i>Daftar
-                    </a>
-                @endauth
-            </div>
-        </div>
-    </nav>
+    @include('layouts.partials.navbar')
 
     <!-- Hero Section -->
-    <section class="pt-32 pb-16 bg-[#EAEAEA]">
+    <section class="py-16 bg-[#EAEAEA] mt-20">
         <div class="container mx-auto px-4 flex flex-col md:flex-row items-center">
             <div class="md:w-1/2 mb-10 md:mb-0">
-                <h1 class="text-4xl font-bold leading-tight mb-4">
+                <h1 class="text-4xl font-bold leading-tight mb-4 hero-fade-in">
                     Buktikan <span class="text-green-500" data-aos="fade-up" data-aos-delay="300">Energi Hijau</span> Anda, Kurangi <span class="text-green-500" data-aos="fade-up" data-aos-delay="500">Jejak Karbon</span> Sekarang!
                 </h1>
                 <p class="text-gray-600 mb-8" data-aos="fade-up" data-aos-delay="700">Kontribusi nyata dalam upaya mengurangi emisi karbon dan mendukung transisi energi bersih di Indonesia.</p>
@@ -321,11 +262,11 @@
                     <div class="flex items-center mb-4">
                         <svg class="h-6 w-6 text-green-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                       </svg>
-                       <span class="font-bold text-xl">Renewa</span>
-                   </div>
-                   <p class="text-gray-400 mb-4">Hak Cipta © 2025 Renewa Indonesia.<br>Seluruh hak dilindungi undang-undang.</p>
-                   <div class="flex space-x-4">
+                        </svg>
+                        <span class="font-bold text-xl">Renewa</span>
+                    </div>
+                    <p class="text-gray-400 mb-4">Hak Cipta © 2025 Renewa Indonesia.<br>Seluruh hak dilindungi undang-undang.</p>
+                    <div class="flex space-x-4">
                        <a href="#" class="text-gray-400 hover:text-white transition-colors hover:scale-110"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg></a>
                        <a href="#" class="text-gray-400 hover:text-white transition-colors hover:scale-110"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg></a>
                        <a href="#" class="text-gray-400 hover:text-white transition-colors hover:scale-110"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
@@ -409,6 +350,29 @@
            });
        });
 
+       // Add loading animation to images
+       document.addEventListener('DOMContentLoaded', function() {
+           const images = document.querySelectorAll('img');
+           images.forEach(img => {
+               img.addEventListener('load', function() {
+                   this.style.opacity = '1';
+               });
+               if (img.complete) {
+                   img.style.opacity = '1';
+               }
+           });
+       });
+
+       // Parallax effect for hero section
+       window.addEventListener('scroll', function() {
+           const scrolled = window.pageYOffset;
+           const parallax = document.querySelector('.hero-fade-in');
+           if (parallax) {
+               const speed = scrolled * 0.5;
+               parallax.style.transform = `translateY(${speed}px)`;
+           }
+       });
+
        // Enhanced hover effects for cards
        document.querySelectorAll('.hover-lift').forEach(card => {
            card.addEventListener('mouseenter', function() {
@@ -422,6 +386,58 @@
            });
        });
 
+       // Counter animation for statistics
+       function animateCounters() {
+           const counters = document.querySelectorAll('.text-2xl.font-bold');
+           counters.forEach(counter => {
+               const target = parseInt(counter.textContent.replace(/,/g, ''));
+               const duration = 2000;
+               const step = target / (duration / 16);
+               let current = 0;
+               
+               const timer = setInterval(() => {
+                   current += step;
+                   if (current >= target) {
+                       counter.textContent = target.toLocaleString() + ' MW';
+                       clearInterval(timer);
+                   } else {
+                       counter.textContent = Math.floor(current).toLocaleString() + ' MW';
+                   }
+               }, 16);
+           });
+       }
+
+       // Trigger counter animation when in viewport
+       const observer = new IntersectionObserver((entries) => {
+           entries.forEach(entry => {
+               if (entry.isIntersecting && entry.target.id === 'statistics-section') {
+                   animateCounters();
+                   observer.unobserve(entry.target);
+               }
+           });
+       });
+
+       // Add ID to statistics section for observation
+       const statsSection = document.querySelector('.grid.grid-cols-2.md\\:grid-cols-5');
+       if (statsSection) {
+           statsSection.id = 'statistics-section';
+           observer.observe(statsSection);
+       }
+
+       // Enhanced page load animation
+       window.addEventListener('load', function() {
+           document.body.classList.add('loaded');
+           
+           // Stagger animation for navbar items
+           const navItems = document.querySelectorAll('nav a');
+           navItems.forEach((item, index) => {
+               setTimeout(() => {
+                   item.style.opacity = '1';
+                   item.style.transform = 'translateY(0)';
+               }, index * 100);
+           });
+       });
+
        // Add scroll progress indicator
        const scrollProgress = document.createElement('div');
        scrollProgress.style.cssText = `
@@ -429,8 +445,8 @@
            top: 0;
            left: 0;
            width: 0%;
-           height: 4px;
-           background: linear-gradient(90deg, #10b981, #3b82f6);
+           height: 3px;
+           background: linear-gradient(90deg, #10b981, #34d399);
            z-index: 9999;
            transition: width 0.3s ease;
        `;
