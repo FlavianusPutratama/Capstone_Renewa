@@ -153,7 +153,7 @@
     </section>
 
     <!-- Data dan Peta Section -->
-    <section class="py-16 bg-white">
+    <section class="py-16 bg-white">git
         <div class="container mx-auto px-4">
             <div class="flex flex-col md:flex-row items-center">
                 <div class="md:w-1/2 mb-10 md:mb-0" data-aos="fade-right" data-aos-duration="1000">
