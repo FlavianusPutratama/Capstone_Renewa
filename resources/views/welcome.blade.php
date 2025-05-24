@@ -57,6 +57,12 @@
             background-color: rgba(255, 255, 255, 0.9);
             transition: all 0.3s ease;
         }
+        
+        /* Counter animation class */
+        .counter-number {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -163,7 +169,7 @@
     </section>
 
     <!-- Potensi Energi Section -->
-    <section class="py-16 bg-gray-50">
+    <section class="py-16 bg-gray-50" id="statistics-section">
         <div class="container mx-auto px-4 text-center">
             <h2 class="text-2xl font-bold mb-1" data-aos="fade-up">Potensi <span class="text-green-500">Energi Baru Terbarukan (EBT)</span> di Indonesia</h2>
             <p class="text-gray-600 mb-12" data-aos="fade-up" data-aos-delay="200">Kapasitas cadangan besar potensi EBT di Indonesia</p>
@@ -176,7 +182,7 @@
                         </svg>
                     </div>
                     <h3 class="text-gray-600 text-sm mb-2">Panas Bumi</h3>
-                    <p class="text-2xl font-bold">29,544 MW</p>
+                    <p class="counter-number" data-target="29544">29,544 MW</p>
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-sm hover-lift" data-aos="flip-left" data-aos-delay="200">
                     <div class="w-12 h-12 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4">
@@ -185,7 +191,7 @@
                         </svg>
                     </div>
                     <h3 class="text-gray-600 text-sm mb-2">Bayu</h3>
-                    <p class="text-2xl font-bold">60,647 MW</p>
+                    <p class="counter-number" data-target="60647">60,647 MW</p>
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-sm hover-lift" data-aos="flip-left" data-aos-delay="300">
                     <div class="w-12 h-12 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-4">
@@ -194,7 +200,7 @@
                         </svg>
                     </div>
                     <h3 class="text-gray-600 text-sm mb-2">Bioenergi</h3>
-                    <p class="text-2xl font-bold">207,898 MW</p>
+                    <p class="counter-number" data-target="207898">207,898 MW</p>
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-sm hover-lift" data-aos="flip-left" data-aos-delay="400">
                     <div class="w-12 h-12 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4">
@@ -203,7 +209,7 @@
                         </svg>
                     </div>
                     <h3 class="text-gray-600 text-sm mb-2">Surya</h3>
-                    <p class="text-2xl font-bold">94,476 MW</p>
+                    <p class="counter-number" data-target="94476">94,476 MW</p>
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-sm hover-lift" data-aos="flip-left" data-aos-delay="500">
                     <div class="w-12 h-12 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4">
@@ -212,7 +218,7 @@
                         </svg>
                     </div>
                     <h3 class="text-gray-600 text-sm mb-2">Hidro</h3>
-                    <p class="text-2xl font-bold">17,989 MW</p>
+                    <p class="counter-number" data-target="17989">17,989 MW</p>
                 </div>
             </div>
         </div>
@@ -255,10 +261,10 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-12" data-aos="fade-up">
+    <footer class="bg-gray-800 text-white py-12">
         <div class="container mx-auto px-4">
             <div class="flex flex-col md:flex-row justify-between">
-                <div class="mb-8 md:mb-0" data-aos="fade-right" data-aos-delay="100">
+                <div class="mb-8 md:mb-0">
                     <div class="flex items-center mb-4">
                         <svg class="h-6 w-6 text-green-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
@@ -274,7 +280,7 @@
                </div>
 
                <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
-                   <div data-aos="fade-up" data-aos-delay="200">
+                   <div>
                        <h3 class="text-lg font-semibold mb-4">Perusahaan</h3>
                        <ul class="space-y-2">
                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Tentang Kami</a></li>
@@ -284,7 +290,7 @@
                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Testimonial</a></li>
                        </ul>
                    </div>
-                   <div data-aos="fade-up" data-aos-delay="300">
+                   <div>
                        <h3 class="text-lg font-semibold mb-4">Dukungan</h3>
                        <ul class="space-y-2">
                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Pusat Bantuan</a></li>
@@ -294,7 +300,7 @@
                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Status</a></li>
                        </ul>
                    </div>
-                   <div class="col-span-2 md:col-span-1" data-aos="fade-up" data-aos-delay="400">
+                   <div class="col-span-2 md:col-span-1">
                        <h3 class="text-lg font-semibold mb-4">Tetap terhubung</h3>
                        <p class="text-gray-400 mb-4">Dapatkan update dan berita terbaru tentang energi terbarukan</p>
                        <div class="flex">
@@ -363,16 +369,6 @@
            });
        });
 
-       // Parallax effect for hero section
-       window.addEventListener('scroll', function() {
-           const scrolled = window.pageYOffset;
-           const parallax = document.querySelector('.hero-fade-in');
-           if (parallax) {
-               const speed = scrolled * 0.5;
-               parallax.style.transform = `translateY(${speed}px)`;
-           }
-       });
-
        // Enhanced hover effects for cards
        document.querySelectorAll('.hover-lift').forEach(card => {
            card.addEventListener('mouseenter', function() {
@@ -386,11 +382,13 @@
            });
        });
 
-       // Counter animation for statistics
+       // Fixed counter animation for statistics only
        function animateCounters() {
-           const counters = document.querySelectorAll('.text-2xl.font-bold');
+           const counters = document.querySelectorAll('.counter-number');
            counters.forEach(counter => {
-               const target = parseInt(counter.textContent.replace(/,/g, ''));
+               const target = parseInt(counter.getAttribute('data-target'));
+               if (!target || isNaN(target)) return; // Skip if no valid target
+               
                const duration = 2000;
                const step = target / (duration / 16);
                let current = 0;
@@ -407,20 +405,20 @@
            });
        }
 
-       // Trigger counter animation when in viewport
+       // Trigger counter animation when statistics section is visible
+       let hasAnimated = false;
        const observer = new IntersectionObserver((entries) => {
            entries.forEach(entry => {
-               if (entry.isIntersecting && entry.target.id === 'statistics-section') {
+               if (entry.isIntersecting && !hasAnimated) {
                    animateCounters();
-                   observer.unobserve(entry.target);
+                   hasAnimated = true; // Prevent multiple animations
                }
            });
        });
 
-       // Add ID to statistics section for observation
-       const statsSection = document.querySelector('.grid.grid-cols-2.md\\:grid-cols-5');
+       // Observe the statistics section
+       const statsSection = document.getElementById('statistics-section');
        if (statsSection) {
-           statsSection.id = 'statistics-section';
            observer.observe(statsSection);
        }
 

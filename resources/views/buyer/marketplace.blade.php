@@ -6,36 +6,16 @@
     <title>Marketplace - Renewa</title>
     <meta name="description" content="Marketplace untuk pembelian produk energi terbarukan.">
     <script src="https://cdn.tailwindcss.com"></script>
+    @vite('resources/css/app.css')
+    
+    <!-- AOS CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="bg-gradient-to-br from-green-50 via-white to-green-100">
-    <nav class="bg-white shadow-sm py-4 mb-4">
-        <div class="container mx-auto px-4 flex justify-between items-center">
-            <div class="flex items-center space-x-10">
-                <a href="/" class="font-bold text-xl text-gray-800">Renewa</a>
-                <div class="hidden md:flex space-x-6">
-                    <a href="{{ route('welcome') }}" class="text-gray-600 hover:text-green-500">Beranda</a>
-                    <a href="{{ route('generatormap') }}" class="text-gray-600 hover:text-green-500">Peta Pembangkit</a>
-                    <a href="#" class="text-gray-600 hover:text-green-500">Beli REC</a>
-                </div>
-            </div>
-            <div class="flex items-center space-x-4">
-                @auth
-                    <a href="{{ route('profile.show') }}" class="text-green-600 hover:text-green-700">
-                        {{ $greeting ?? 'Halo' }}, {{ Auth::user()->name }}!
-                    </a>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">Logout</button>
-                    </form>
-                @else
-                    <a href="{{ route('buyer.login') }}" class="text-green-600 hover:text-green-700">Masuk</a>
-                    <a href="{{ route('buyer.register') }}" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">Daftar</a>
-                @endauth
-            </div>
-        </div>
-    </nav>
+    @include('layouts.partials.navbar')
 
-    <main class="py-12 bg-gradient-to-br from-green-50 via-white to-green-100">
+    <main class="pt-32 pb-12 bg-gradient-to-br from-green-50 via-white to-green-100">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <h2 class="text-4xl font-bold mb-6 text-center text-gray-900">
                 Temukan Solusi Energi Terbarukan yang Tepat untuk Anda
