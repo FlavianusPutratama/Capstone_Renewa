@@ -274,380 +274,376 @@
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     
     <script>
-        // Initialize AOS
-        AOS.init({
-            duration: 800,
-            easing: 'ease-in-out',
-            once: true,
-            mirror: false,
-            offset: 50,
-            delay: 0,
-        });
+    // Initialize AOS
+    AOS.init({
+        duration: 800,
+        easing: 'ease-in-out',
+        once: true,
+        mirror: false,
+        offset: 50,
+        delay: 0,
+    });
 
-        // Navbar scroll effect
-        window.addEventListener('scroll', function() {
-            const navbar = document.getElementById('navbar');
-            if (window.scrollY > 50) {
-                navbar.classList.add('navbar-scrolled');
-            } else {
-                navbar.classList.remove('navbar-scrolled');
-            }
-        });
-
-        // User data from server
-        const userData = {
-            province: '{{ $user->province }}',
-            regency: '{{ $user->regency }}',
-            district: '{{ $user->district }}',
-            village: '{{ $user->village }}'
-        };
-
-        let provincesData = {};
-        let regenciesData = {};
-        let districtsData = {};
-        let isEditMode = false;
-
-        // Show notification function
-        function showNotification(message, type = 'error') {
-            const notification = document.createElement('div');
-            notification.className = `fixed top-4 right-4 p-4 rounded-xl text-white font-semibold z-50 transform transition-all duration-300 ${
-                type === 'error' ? 'bg-red-500' : 'bg-green-500'
-            }`;
-            notification.innerHTML = `
-                <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'} mr-2"></i>
-                ${message}
-            `;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.style.transform = 'translateX(0)';
-            }, 100);
-            
-            setTimeout(() => {
-                notification.style.transform = 'translateX(100%)';
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
+    // Navbar scroll effect
+    window.addEventListener('scroll', function() {
+        const navbar = document.getElementById('navbar');
+        if (window.scrollY > 50) {
+            navbar.classList.add('navbar-scrolled');
+        } else {
+            navbar.classList.remove('navbar-scrolled');
         }
+    });
 
-        // Fetch and populate provinces
-        async function fetchProvinces() {
-            try {
-                const response = await fetch('https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json');
-                const provinces = await response.json();
-                provincesData = provinces;
-                
-                const provinceSelect = document.getElementById('province');
-                provinceSelect.innerHTML = '<option value="">Pilih Provinsi</option>';
-                
-                provinces.forEach(province => {
-                    const option = document.createElement('option');
-                    option.value = province.name;
-                    option.textContent = province.name;
-                    option.dataset.id = province.id;
-                    provinceSelect.appendChild(option);
-                });
+    // User data from server
+    const userData = {
+        province: '{{ $user->province }}',
+        regency: '{{ $user->regency }}',
+        district: '{{ $user->district }}',
+        village: '{{ $user->village }}'
+    };
 
-                // Set selected province if exists
-                if (userData.province) {
-                    provinceSelect.value = userData.province;
-                    const selectedProvince = provinces.find(p => p.name === userData.province);
-                    if (selectedProvince) {
-                        await fetchRegencies(selectedProvince.id);
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching provinces:', error);
-                showNotification('Gagal memuat data provinsi', 'error');
-            }
-        }
+    let provincesData = {};
+    let regenciesData = {};
+    let districtsData = {};
+    let isEditMode = false;
 
-        // Fetch and populate regencies
-        async function fetchRegencies(provinceId) {
-            try {
-                const response = await fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${provinceId}.json`);
-                const regencies = await response.json();
-                regenciesData = regencies;
-                
-                const regencySelect = document.getElementById('regency');
-                regencySelect.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
-                
-                regencies.forEach(regency => {
-                    const option = document.createElement('option');
-                    option.value = regency.name;
-                    option.textContent = regency.name;
-                    option.dataset.id = regency.id;
-                    regencySelect.appendChild(option);
-                });
+    // Show notification function
+    function showNotification(message, type = 'error') {
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 p-4 rounded-xl text-white font-semibold z-50 transform transition-all duration-300 ${
+            type === 'error' ? 'bg-red-500' : 'bg-green-500'
+        }`;
+        notification.innerHTML = `
+            <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'} mr-2"></i>
+            ${message}
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
+        
+        setTimeout(() => {
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
 
-                regencySelect.disabled = false;
-
-                // Set selected regency if exists
-                if (userData.regency) {
-                    regencySelect.value = userData.regency;
-                    const selectedRegency = regencies.find(r => r.name === userData.regency);
-                    if (selectedRegency) {
-                        await fetchDistricts(selectedRegency.id);
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching regencies:', error);
-                showNotification('Gagal memuat data kabupaten/kota', 'error');
-            }
-        }
-
-        // Fetch and populate districts
-        async function fetchDistricts(regencyId) {
-            try {
-                const response = await fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/districts/${regencyId}.json`);
-                const districts = await response.json();
-                districtsData = districts;
-                
-                const districtSelect = document.getElementById('district');
-                districtSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
-                
-                districts.forEach(district => {
-                    const option = document.createElement('option');
-                    option.value = district.name;
-                    option.textContent = district.name;
-                    option.dataset.id = district.id;
-                    districtSelect.appendChild(option);
-                });
-
-                districtSelect.disabled = false;
-
-                // Set selected district if exists
-                if (userData.district) {
-                    districtSelect.value = userData.district;
-                    const selectedDistrict = districts.find(d => d.name === userData.district);
-                    if (selectedDistrict) {
-                        await fetchVillages(selectedDistrict.id);
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching districts:', error);
-                showNotification('Gagal memuat data kecamatan', 'error');
-            }
-        }
-
-        // Fetch and populate villages
-        async function fetchVillages(districtId) {
-            try {
-                const response = await fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/villages/${districtId}.json`);
-                const villages = await response.json();
-                
-                const villageSelect = document.getElementById('village');
-                villageSelect.innerHTML = '<option value="">Pilih Kelurahan</option>';
-                
-                villages.forEach(village => {
-                    const option = document.createElement('option');
-                    option.value = village.name;
-                    option.textContent = village.name;
-                    villageSelect.appendChild(option);
-                });
-
-                villageSelect.disabled = false;
-
-                // Set selected village if exists
-                if (userData.village) {
-                    villageSelect.value = userData.village;
-                }
-            } catch (error) {
-                console.error('Error fetching villages:', error);
-                showNotification('Gagal memuat data kelurahan', 'error');
-            }
-        }
-
-        // Event listeners for dropdown changes
-        document.getElementById('province').addEventListener('change', async function() {
-            const selectedOption = this.options[this.selectedIndex];
-            const provinceId = selectedOption.dataset.id;
+    // Fetch and populate provinces
+    async function fetchProvinces() {
+        try {
+            const response = await fetch('https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json');
+            const provinces = await response.json();
+            provincesData = provinces;
             
-            // Reset dependent dropdowns
-            document.getElementById('regency').innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
-            document.getElementById('district').innerHTML = '<option value="">Pilih Kecamatan</option>';
-            document.getElementById('village').innerHTML = '<option value="">Pilih Kelurahan</option>';
+            const provinceSelect = document.getElementById('province');
+            provinceSelect.innerHTML = '<option value="">Pilih Provinsi</option>';
             
-            document.getElementById('regency').disabled = true;
-            document.getElementById('district').disabled = true;
-            document.getElementById('village').disabled = true;
-
-            if (provinceId) {
-                await fetchRegencies(provinceId);
-            }
-        });
-
-        document.getElementById('regency').addEventListener('change', async function() {
-            const selectedOption = this.options[this.selectedIndex];
-            const regencyId = selectedOption.dataset.id;
-            
-            // Reset dependent dropdowns
-            document.getElementById('district').innerHTML = '<option value="">Pilih Kecamatan</option>';
-            document.getElementById('village').innerHTML = '<option value="">Pilih Kelurahan</option>';
-            
-            document.getElementById('district').disabled = true;
-            document.getElementById('village').disabled = true;
-
-            if (regencyId) {
-                await fetchDistricts(regencyId);
-            }
-        });
-
-        document.getElementById('district').addEventListener('change', async function() {
-            const selectedOption = this.options[this.selectedIndex];
-            const districtId = selectedOption.dataset.id;
-            
-            // Reset village dropdown
-            document.getElementById('village').innerHTML = '<option value="">Pilih Kelurahan</option>';
-            document.getElementById('village').disabled = true;
-
-            if (districtId) {
-                await fetchVillages(districtId);
-            }
-        });
-
-        // Edit button functionality
-        document.getElementById('editButton').addEventListener('click', function() {
-            isEditMode = !isEditMode;
-            const inputs = document.querySelectorAll('#profileForm input, #profileForm select');
-            const saveButton = document.getElementById('saveButtonContainer');
-            
-            inputs.forEach(input => {
-                input.disabled = !isEditMode;
+            provinces.forEach(province => {
+                const option = document.createElement('option');
+                option.value = province.name;
+                option.textContent = province.name;
+                option.dataset.id = province.id;
+                provinceSelect.appendChild(option);
             });
+
+            // Set selected province if exists
+            if (userData.province) {
+                provinceSelect.value = userData.province;
+                const selectedProvince = provinces.find(p => p.name === userData.province);
+                if (selectedProvince) {
+                    await fetchRegencies(selectedProvince.id);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching provinces:', error);
+            showNotification('Gagal memuat data provinsi', 'error');
+        }
+    }
+
+    // Fetch and populate regencies
+    async function fetchRegencies(provinceId) {
+        try {
+            const response = await fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${provinceId}.json`);
+            const regencies = await response.json();
+            regenciesData = regencies;
             
-            if (isEditMode) {
-                this.innerHTML = '<i class="fas fa-times mr-2"></i>Batal';
-                this.className = 'px-4 py-2 bg-red-100 hover:bg-red-200 rounded-xl transition-colors flex items-center text-red-700';
-                saveButton.classList.remove('hidden');
+            const regencySelect = document.getElementById('regency');
+            regencySelect.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
+            
+            regencies.forEach(regency => {
+                const option = document.createElement('option');
+                option.value = regency.name;
+                option.textContent = regency.name;
+                option.dataset.id = regency.id;
+                regencySelect.appendChild(option);
+            });
+
+            // PERBAIKAN DI SINI: Aktifkan hanya jika dalam mode edit
+            regencySelect.disabled = !isEditMode;
+
+            // Set selected regency if exists
+            if (userData.regency) {
+                regencySelect.value = userData.regency;
+                const selectedRegency = regencies.find(r => r.name === userData.regency);
+                if (selectedRegency) {
+                    await fetchDistricts(selectedRegency.id);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching regencies:', error);
+            showNotification('Gagal memuat data kabupaten/kota', 'error');
+        }
+    }
+
+    // Fetch and populate districts
+    async function fetchDistricts(regencyId) {
+        try {
+            const response = await fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/districts/${regencyId}.json`);
+            const districts = await response.json();
+            districtsData = districts;
+            
+            const districtSelect = document.getElementById('district');
+            districtSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
+            
+            districts.forEach(district => {
+                const option = document.createElement('option');
+                option.value = district.name;
+                option.textContent = district.name;
+                option.dataset.id = district.id;
+                districtSelect.appendChild(option);
+            });
+
+            // PERBAIKAN DI SINI: Aktifkan hanya jika dalam mode edit
+            districtSelect.disabled = !isEditMode;
+
+            // Set selected district if exists
+            if (userData.district) {
+                districtSelect.value = userData.district;
+                const selectedDistrict = districts.find(d => d.name === userData.district);
+                if (selectedDistrict) {
+                    await fetchVillages(selectedDistrict.id);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching districts:', error);
+            showNotification('Gagal memuat data kecamatan', 'error');
+        }
+    }
+
+    // Fetch and populate villages
+    async function fetchVillages(districtId) {
+        try {
+            const response = await fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/villages/${districtId}.json`);
+            const villages = await response.json();
+            
+            const villageSelect = document.getElementById('village');
+            villageSelect.innerHTML = '<option value="">Pilih Kelurahan</option>';
+            
+            villages.forEach(village => {
+                const option = document.createElement('option');
+                option.value = village.name;
+                option.textContent = village.name;
+                villageSelect.appendChild(option);
+            });
+
+            // PERBAIKAN DI SINI: Aktifkan hanya jika dalam mode edit
+            villageSelect.disabled = !isEditMode;
+
+            // Set selected village if exists
+            if (userData.village) {
+                villageSelect.value = userData.village;
+            }
+        } catch (error) {
+            console.error('Error fetching villages:', error);
+            showNotification('Gagal memuat data kelurahan', 'error');
+        }
+    }
+
+    // Event listeners for dropdown changes
+    document.getElementById('province').addEventListener('change', async function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const provinceId = selectedOption.dataset.id;
+        
+        document.getElementById('regency').innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
+        document.getElementById('district').innerHTML = '<option value="">Pilih Kecamatan</option>';
+        document.getElementById('village').innerHTML = '<option value="">Pilih Kelurahan</option>';
+        
+        document.getElementById('regency').disabled = true;
+        document.getElementById('district').disabled = true;
+        document.getElementById('village').disabled = true;
+
+        if (provinceId) {
+            await fetchRegencies(provinceId);
+        }
+    });
+
+    document.getElementById('regency').addEventListener('change', async function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const regencyId = selectedOption.dataset.id;
+        
+        document.getElementById('district').innerHTML = '<option value="">Pilih Kecamatan</option>';
+        document.getElementById('village').innerHTML = '<option value="">Pilih Kelurahan</option>';
+        
+        document.getElementById('district').disabled = true;
+        document.getElementById('village').disabled = true;
+
+        if (regencyId) {
+            await fetchDistricts(regencyId);
+        }
+    });
+
+    document.getElementById('district').addEventListener('change', async function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const districtId = selectedOption.dataset.id;
+        
+        document.getElementById('village').innerHTML = '<option value="">Pilih Kelurahan</option>';
+        document.getElementById('village').disabled = true;
+
+        if (districtId) {
+            await fetchVillages(districtId);
+        }
+    });
+
+    // Edit button functionality
+    document.getElementById('editButton').addEventListener('click', function() {
+        isEditMode = !isEditMode;
+        const inputs = document.querySelectorAll('#profileForm input, #profileForm select');
+        const saveButton = document.getElementById('saveButtonContainer');
+        
+        inputs.forEach(input => {
+            // Khusus untuk input email dan NIK, bisa dibuat agar tetap disabled jika tidak boleh diubah
+            // if (input.name === 'email' || input.name === 'nik') return;
+            input.disabled = !isEditMode;
+        });
+        
+        if (isEditMode) {
+            this.innerHTML = '<i class="fas fa-times mr-2"></i>Batal';
+            this.className = 'px-4 py-2 bg-red-100 hover:bg-red-200 rounded-xl transition-colors flex items-center text-red-700';
+            saveButton.classList.remove('hidden');
+        } else {
+            this.innerHTML = '<i class="fas fa-edit mr-2"></i>Edit Profil';
+            this.className = 'px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors flex items-center';
+            saveButton.classList.add('hidden');
+            
+            // Reset form to original values
+            document.querySelector('input[name="name"]').value = '{{ $user->name }}';
+            document.querySelector('input[name="email"]').value = '{{ $user->email }}';
+            document.querySelector('input[name="phone"]').value = '{{ $user->phone }}';
+            document.querySelector('input[name="nik"]').value = '{{ $user->nik }}';
+            document.querySelector('input[name="address"]').value = '{{ $user->address }}';
+            
+            // Reset dropdowns
+            fetchProvinces();
+        }
+    });
+
+    // Form submission with validation
+    document.getElementById('profileForm').addEventListener('submit', function(e) {
+        if (!isEditMode) {
+            e.preventDefault();
+            return;
+        }
+
+        const requiredFields = ['name', 'email', 'phone', 'nik', 'address', 'province', 'regency', 'district', 'village'];
+        let isValid = true;
+
+        requiredFields.forEach(field => {
+            const input = document.querySelector(`[name="${field}"]`);
+            if (!input.value.trim()) {
+                input.classList.add('border-red-500');
+                isValid = false;
             } else {
-                this.innerHTML = '<i class="fas fa-edit mr-2"></i>Edit Profil';
-                this.className = 'px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors flex items-center';
-                saveButton.classList.add('hidden');
-                
-                // Reset form to original values
-                document.querySelector('input[name="name"]').value = '{{ $user->name }}';
-                document.querySelector('input[name="email"]').value = '{{ $user->email }}';
-                document.querySelector('input[name="phone"]').value = '{{ $user->phone }}';
-                document.querySelector('input[name="nik"]').value = '{{ $user->nik }}';
-                document.querySelector('input[name="address"]').value = '{{ $user->address }}';
-                
-                // Reset dropdowns
-                fetchProvinces();
+                input.classList.remove('border-red-500');
             }
         });
 
-        // Form submission with validation
-        document.getElementById('profileForm').addEventListener('submit', function(e) {
-            if (!isEditMode) {
-                e.preventDefault();
-                return;
+        if (!isValid) {
+            e.preventDefault();
+            showNotification('Mohon lengkapi semua field yang wajib diisi', 'error');
+            return;
+        }
+
+        const email = document.querySelector('input[name="email"]').value;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            e.preventDefault();
+            document.querySelector('input[name="email"]').classList.add('border-red-500');
+            showNotification('Format email tidak valid', 'error');
+            return;
+        }
+
+        const nik = document.querySelector('input[name="nik"]').value;
+        if (nik.length !== 16) {
+            e.preventDefault();
+            document.querySelector('input[name="nik"]').classList.add('border-red-500');
+            showNotification('NIK harus 16 digit', 'error');
+            return;
+        }
+
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...';
+        
+        setTimeout(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }, 2000);
+    });
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+        fetchProvinces();
+        
+        const successAlert = document.querySelector('.bg-green-50');
+        if (successAlert) {
+            setTimeout(() => {
+                successAlert.style.opacity = '0';
+                setTimeout(() => successAlert.remove(), 300);
+            }, 5000);
+        }
+    });
+
+    // Phone number formatting
+    document.querySelector('input[name="phone"]').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.startsWith('8') && value.length > 1) {
+            value = '0' + value;
+        }
+        if (value.length > 15) {
+            value = value.slice(0, 15);
+        }
+        e.target.value = value;
+    });
+
+    // NIK formatting
+    document.querySelector('input[name="nik"]').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 16) {
+            value = value.slice(0, 16);
+        }
+        e.target.value = value;
+    });
+
+    // Real-time validation feedback
+    const inputs = document.querySelectorAll('input, select');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.hasAttribute('required') && !this.value.trim()) {
+                this.classList.add('border-red-500');
+            } else {
+                this.classList.remove('border-red-500');
             }
+        });
 
-            // Basic validation
-            const requiredFields = ['name', 'email', 'phone', 'nik', 'address', 'province', 'regency', 'district', 'village'];
-            let isValid = true;
-
-            requiredFields.forEach(field => {
-                const input = document.querySelector(`[name="${field}"]`);
-                if (!input.value.trim()) {
-                   input.classList.add('border-red-500');
-                   isValid = false;
-               } else {
-                   input.classList.remove('border-red-500');
-               }
-           });
-
-           if (!isValid) {
-               e.preventDefault();
-               showNotification('Mohon lengkapi semua field yang wajib diisi', 'error');
-               return;
-           }
-
-           // Email validation
-           const email = document.querySelector('input[name="email"]').value;
-           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-           if (!emailRegex.test(email)) {
-               e.preventDefault();
-               document.querySelector('input[name="email"]').classList.add('border-red-500');
-               showNotification('Format email tidak valid', 'error');
-               return;
-           }
-
-           // NIK validation
-           const nik = document.querySelector('input[name="nik"]').value;
-           if (nik.length !== 16) {
-               e.preventDefault();
-               document.querySelector('input[name="nik"]').classList.add('border-red-500');
-               showNotification('NIK harus 16 digit', 'error');
-               return;
-           }
-
-           // Show loading state
-           const submitBtn = this.querySelector('button[type="submit"]');
-           const originalText = submitBtn.innerHTML;
-           submitBtn.disabled = true;
-           submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...';
-           
-           // Reset loading state after form submission
-           setTimeout(() => {
-               submitBtn.disabled = false;
-               submitBtn.innerHTML = originalText;
-           }, 2000);
-       });
-
-       // Initialize page
-       document.addEventListener('DOMContentLoaded', function() {
-           fetchProvinces();
-           
-           // Auto-hide success message
-           const successAlert = document.querySelector('.bg-green-50');
-           if (successAlert) {
-               setTimeout(() => {
-                   successAlert.style.opacity = '0';
-                   setTimeout(() => successAlert.remove(), 300);
-               }, 5000);
-           }
-       });
-
-       // Phone number formatting
-       document.querySelector('input[name="phone"]').addEventListener('input', function(e) {
-           let value = e.target.value.replace(/\D/g, '');
-           if (value.startsWith('8') && value.length > 1) {
-               value = '0' + value;
-           }
-           if (value.length > 15) {
-               value = value.slice(0, 15);
-           }
-           e.target.value = value;
-       });
-
-       // NIK formatting
-       document.querySelector('input[name="nik"]').addEventListener('input', function(e) {
-           let value = e.target.value.replace(/\D/g, '');
-           if (value.length > 16) {
-               value = value.slice(0, 16);
-           }
-           e.target.value = value;
-       });
-
-       // Real-time validation feedback
-       const inputs = document.querySelectorAll('input, select');
-       inputs.forEach(input => {
-           input.addEventListener('blur', function() {
-               if (this.hasAttribute('required') && !this.value.trim()) {
-                   this.classList.add('border-red-500');
-               } else {
-                   this.classList.remove('border-red-500');
-               }
-           });
-
-           input.addEventListener('input', function() {
-               if (this.classList.contains('border-red-500') && this.value.trim()) {
-                   this.classList.remove('border-red-500');
-               }
-           });
-       });
-   </script>
+        input.addEventListener('input', function() {
+            if (this.classList.contains('border-red-500') && this.value.trim()) {
+                this.classList.remove('border-red-500');
+            }
+        });
+    });
+</script>
 </body>
 </html>
