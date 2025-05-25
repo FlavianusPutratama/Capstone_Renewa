@@ -1,5 +1,5 @@
 <?php
-//app/Http/Middleware/CheckRole.php
+// app/Http/Middleware/CheckRole.php
 
 namespace App\Http\Middleware;
 
@@ -16,8 +16,7 @@ class CheckRole
     public function handle(Request $request, Closure $next, string $role): Response
     {
         if (!Auth::check()) {
-            // Arahkan ke rute login pembeli
-            return redirect()->route('login');
+            return redirect()->route('buyer.login');
         }
 
         $user = Auth::user();

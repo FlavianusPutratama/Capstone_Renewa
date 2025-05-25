@@ -1,5 +1,5 @@
 <?php
-//app/Http/Controllers/Buyer/AuthController.php
+// app/Http/Controllers/Buyer/AuthController.php
 
 namespace App\Http\Controllers\Buyer;
 
@@ -15,8 +15,6 @@ class AuthController extends Controller
 {
     /**
      * Display the buyer login view.
-     *
-     * @return \Illuminate\View\View
      */
     public function showLoginForm()
     {
@@ -25,20 +23,15 @@ class AuthController extends Controller
 
     /**
      * Display Profile Page
-     *
-     * @return \Illuminate\View\View
      */
     public function showProfile()
     {
-        $user = auth()->user(); // Mengambil data pengguna yang sedang login
-        return view('buyer.profile', compact('user')); // Mengirimkan variabel $user ke tampilan
+        $user = auth()->user();
+        return view('buyer.profile', compact('user'));
     }
 
     /**
      * Update from Profile Page
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
      */
     public function updateProfile(Request $request)
     {
@@ -55,26 +48,23 @@ class AuthController extends Controller
         ]);
 
         $user = auth()->user();
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->phone = $request->phone; // Update phone field
-        $user->nik = $request->nik; // Update NIK field
-        $user->address = $request->address; // Update address field
-        $user->province = $request->province; // Update province field
-        $user->regency = $request->regency; // Update regency field
-        $user->district = $request->district; // Update district field
-        $user->village = $request->village; // Update village field
-        // Update field lainnya sesuai kebutuhan
-        $user->save();
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'nik' => $request->nik,
+            'address' => $request->address,
+            'province' => $request->province,
+            'regency' => $request->regency,
+            'district' => $request->district,
+            'village' => $request->village,
+        ]);
 
         return redirect()->route('profile.show')->with('success', 'Profil berhasil diperbarui.');
     }
 
     /**
      * Handle an incoming authentication request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
      */
     public function login(Request $request)
     {
@@ -86,7 +76,6 @@ class AuthController extends Controller
         if (Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            // Ensure the user is a buyer
             if (Auth::user()->isBuyer()) {
                 return redirect()->intended('/buyer/categoryselect');
             } else {
@@ -104,8 +93,6 @@ class AuthController extends Controller
 
     /**
      * Display the buyer registration view.
-     *
-     * @return \Illuminate\View\View
      */
     public function showRegistrationForm()
     {
@@ -114,9 +101,6 @@ class AuthController extends Controller
 
     /**
      * Handle an incoming registration request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
      */
     public function register(Request $request)
     {
@@ -138,18 +122,17 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
-            'nik' => $request->nik, // NIK field
-            'address' => $request->address, // Address field
-            'province' => $request->province, // Store province name
-            'regency' => $request->regency, // Store regency name
-            'district' => $request->district, // Store district name
-            'village' => $request->village, // Village field
+            'nik' => $request->nik,
+            'address' => $request->address,
+            'province' => $request->province,
+            'regency' => $request->regency,
+            'district' => $request->district,
+            'village' => $request->village,
             'password' => Hash::make($request->password),
             'role' => 'buyer',
         ]);
 
         event(new Registered($user));
-
         Auth::login($user);
 
         return redirect('/');
@@ -157,14 +140,10 @@ class AuthController extends Controller
 
     /**
      * Log the user out of the application.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
      */
     public function logout(Request $request)
     {
         Auth::logout();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

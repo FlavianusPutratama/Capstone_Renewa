@@ -16,12 +16,12 @@ class User extends Authenticatable
         'password',
         'role',
         'phone',
-        'nik', // NIK field
-        'address', // Address field
-        'province', // Store province name
-        'regency', // Store regency name
-        'district', // Store district name
-        'village', // Village field
+        'nik',
+        'address',
+        'province',
+        'regency',
+        'district',
+        'village',
     ];
 
     protected $hidden = [
