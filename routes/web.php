@@ -1,9 +1,11 @@
 <?php
+
 // routes/web.php
 
-namespace routes\web;
+// Namespace tidak diperlukan di sini jika file ini berada di root 'routes'
+// namespace routes\web; 
 
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProfileController; // Ini mungkin tidak terpakai jika Anda menggunakan BuyerAuthController untuk semua profil buyer
 use App\Http\Controllers\Buyer\AuthController as BuyerAuthController;
 use App\Http\Controllers\Issuer\AuthController as IssuerAuthController;
 use App\Http\Controllers\Buyer\MarketplaceController;
@@ -34,13 +36,17 @@ Route::middleware(['auth', 'App\Http\Middleware\CheckRole:buyer'])->prefix('buye
     })->name('buyer.categoryselect');
 
     Route::get('/dashboard', function () {
-        return view('dashboard');
+        return view('dashboard'); // Pastikan view 'dashboard' ini ada atau sesuaikan path-nya
     })->name('dashboard');
 
     // Profile routes
     Route::get('/profile', [BuyerAuthController::class, 'showProfile'])->name('profile.show');
     Route::post('/profile', [BuyerAuthController::class, 'updateProfile'])->name('profile.update');
-    Route::get('/profile/edit', [BuyerAuthController::class, 'showProfile'])->name('profile.edit');
+    Route::get('/profile/edit', [BuyerAuthController::class, 'showProfile'])->name('profile.edit'); // Biasanya ini juga mengarah ke form edit atau showProfile yang sama
+
+    // --- TAMBAHKAN ROUTE BARU UNTUK UPDATE PASSWORD DI SINI ---
+    Route::post('/profile/password', [BuyerAuthController::class, 'updatePassword'])->name('profile.updatePassword');
+    // ---------------------------------------------------------
 });
 
 // Issuer Authentication Routes
@@ -52,7 +58,8 @@ Route::middleware('guest')->group(function () {
 });
 
 // Protected Issuer Routes
-Route::middleware(['auth', 'role:issuer'])->prefix('issuer')->group(function () {
+// Perbaiki 'role:issuer' menjadi 'App\Http\Middleware\CheckRole:issuer' jika middleware Anda seperti itu
+Route::middleware(['auth', 'App\Http\Middleware\CheckRole:issuer'])->prefix('issuer')->group(function () { 
     Route::get('/dashboard', function () {
         return view('issuer.dashboard');
     })->name('issuer.dashboard');
@@ -61,7 +68,8 @@ Route::middleware(['auth', 'role:issuer'])->prefix('issuer')->group(function () 
 // Auth routes for both
 Route::middleware('auth')->group(function () {
     Route::post('/logout', function() {
-        if (auth()->user()->isIssuer()) {
+        // Pastikan method isIssuer() ada di model User Anda atau sesuaikan logikanya
+        if (auth()->user()->role === 'issuer') { // Contoh jika Anda memiliki kolom 'role'
             return app()->make(IssuerAuthController::class)->logout(request());
         } else {
             return app()->make(BuyerAuthController::class)->logout(request());

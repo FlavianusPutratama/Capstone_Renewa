@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Buyer/AuthController.php
 
 namespace App\Http\Controllers\Buyer;
 
@@ -10,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
+use Illuminate\Validation\ValidationException; // Ditambahkan untuk penanganan error yang lebih spesifik
 
 class AuthController extends Controller
 {
@@ -76,13 +76,14 @@ class AuthController extends Controller
         if (Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            if (Auth::user()->isBuyer()) {
+            // Pastikan method isBuyer() ada di model User Anda atau sesuaikan logikanya
+            if (Auth::user()->role === 'buyer') { // Contoh jika Anda memiliki kolom 'role'
                 return redirect()->intended('/buyer/categoryselect');
             } else {
                 Auth::logout();
                 return back()->withErrors([
                     'email' => 'Kredensial ini tidak memiliki akses sebagai pembeli.',
-                ]);
+                ])->onlyInput('email');
             }
         }
 
@@ -129,13 +130,13 @@ class AuthController extends Controller
             'district' => $request->district,
             'village' => $request->village,
             'password' => Hash::make($request->password),
-            'role' => 'buyer',
+            'role' => 'buyer', // Pastikan ini sesuai dengan sistem role Anda
         ]);
 
         event(new Registered($user));
         Auth::login($user);
 
-        return redirect('/');
+        return redirect('/'); // Atau ke halaman yang lebih sesuai setelah registrasi buyer
     }
 
     /**
@@ -149,4 +150,45 @@ class AuthController extends Controller
 
         return redirect('/');
     }
+
+    // --- METHOD BARU UNTUK UPDATE PASSWORD ---
+    /**
+     * Update the user's password.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function updatePassword(Request $request)
+    {
+        // 1. Validasi Input
+        $request->validate([
+            'current_password' => ['required', 'string'],
+            'new_password' => ['required', 'string', 'min:8', 'confirmed'], 
+            // 'new_password_confirmation' akan divalidasi oleh aturan 'confirmed' pada 'new_password'
+        ]);
+
+        $user = auth()->user();
+
+        // 2. Cek apakah password lama sesuai
+        if (!Hash::check($request->current_password, $user->password)) {
+            // Jika tidak sesuai, kembali dengan pesan error spesifik untuk field current_password
+            // Ini akan ditampilkan di bawah input 'Password Lama' jika Anda menggunakan @error('current_password') di Blade
+            // throw ValidationException::withMessages([
+            //     'current_password' => 'Password lama yang Anda masukkan tidak sesuai.',
+            // ]);
+            // Alternatif: menggunakan session flash error umum
+            return back()->with('error', 'Password lama yang Anda masukkan tidak sesuai.');
+        }
+
+        // 3. Update password baru ke database
+        $user->update([
+            'password' => Hash::make($request->new_password),
+        ]);
+
+        // 4. Kembali ke halaman profil dengan pesan sukses
+        //    Penting: pastikan modal tertutup setelah submit berhasil atau error.
+        //    Menggunakan 'back()' akan mengembalikan ke halaman profil, dan pesan flash akan ditampilkan.
+        return back()->with('success', 'Password berhasil diperbarui!');
+    }
+    // -----------------------------------------
 }
