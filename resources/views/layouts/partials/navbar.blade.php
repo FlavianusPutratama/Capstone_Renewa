@@ -50,7 +50,7 @@
                     </button>
                 </form>
             @else
-                <a href="{{ route('buyer.login') }}" class="text-green-600 hover:text-green-700 font-medium transition-all duration-300">
+                <a href="{{ route('buyer.login', ['source' => 'navbar']) }}" class="text-green-600 hover:text-green-700 font-medium transition-all duration-300">
                     <i class="fas fa-sign-in-alt mr-1"></i>Masuk
                 </a>
                 <a href="{{ route('buyer.register') }}" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-2 rounded-full font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg">

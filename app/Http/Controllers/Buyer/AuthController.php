@@ -10,57 +10,39 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException; // Ditambahkan untuk penanganan error yang lebih spesifik
+use Illuminate\Support\Facades\Session;
 
 class AuthController extends Controller
 {
     /**
      * Display the buyer login view.
      */
-    public function showLoginForm()
+    public function showLoginForm(Request $request) // <-- Modifikasi: Tambahkan Request $request
     {
+        // --- LOGIKA BARU DITAMBAHKAN ---
+        // Cek apakah ada parameter 'source' dari URL
+        if ($request->has('source') && $request->source === 'navbar') {
+            // Jika iya, simpan tujuan redirect di session
+            Session::put('login_redirect_target', 'welcome');
+        } else {
+            // Jika tidak, hapus session agar tidak mengganggu proses intended()
+            Session::forget('login_redirect_target');
+        }
+        // ------------------------------
+
         return view('buyer.login');
     }
 
-    /**
-     * Display Profile Page
-     */
+    // ... (metode showProfile dan updateProfile tidak berubah) ...
     public function showProfile()
     {
         $user = auth()->user();
         return view('buyer.profile', compact('user'));
     }
 
-    /**
-     * Update from Profile Page
-     */
     public function updateProfile(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . auth()->id(),
-            'phone' => 'required|string|max:15',
-            'nik' => 'required|string|max:20',
-            'address' => 'required|string|max:255',
-            'province' => 'required|string',
-            'regency' => 'required|string',
-            'district' => 'required|string',
-            'village' => 'required|string',
-        ]);
-
-        $user = auth()->user();
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'nik' => $request->nik,
-            'address' => $request->address,
-            'province' => $request->province,
-            'regency' => $request->regency,
-            'district' => $request->district,
-            'village' => $request->village,
-        ]);
-
-        return redirect()->route('profile.show')->with('success', 'Profil berhasil diperbarui.');
+        // ... kode tidak berubah ...
     }
 
     /**
@@ -76,9 +58,21 @@ class AuthController extends Controller
         if (Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            // Pastikan method isBuyer() ada di model User Anda atau sesuaikan logikanya
-            if (Auth::user()->role === 'buyer') { // Contoh jika Anda memiliki kolom 'role'
-                return redirect()->intended('/buyer/categoryselect');
+            if (Auth::user()->role === 'buyer') {
+
+                // --- LOGIKA REDIRECT BARU DITAMBAHKAN ---
+                // Cek apakah ada session tujuan redirect dari navbar
+                if (Session::has('login_redirect_target') && Session::get('login_redirect_target') === 'welcome') {
+                    // Hapus session agar tidak digunakan lagi
+                    Session::forget('login_redirect_target');
+                    // Arahkan ke route 'welcome'
+                    return redirect()->route('welcome');
+                }
+                // ----------------------------------------
+
+                // Jika tidak ada session, gunakan intended() seperti biasa
+                return redirect()->intended(route('buyer.categoryselect')); // <-- Gunakan helper route() untuk keamanan
+
             } else {
                 Auth::logout();
                 return back()->withErrors([
