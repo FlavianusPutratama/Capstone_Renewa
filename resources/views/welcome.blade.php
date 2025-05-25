@@ -253,7 +253,7 @@
             <h2 class="text-3xl font-bold mb-4" data-aos="fade-up">Peduli adalah pemasaran baru</h2>
             <p class="text-gray-600 max-w-2xl mx-auto mb-8" data-aos="fade-up" data-aos-delay="200">Bergabunglah dengan komunitas yang peduli terhadap masa depan planet kita. Lihat bagaimana kontribusi Anda dapat membuat perbedaan nyata untuk lingkungan dan masyarakat.</p>
             @auth
-                <a href="{{ route('buyer.login') }}" class="bg-green-500 hover:bg-green-600 text-white font-medium px-6 py-3 rounded-lg inline-block transition-all hover:scale-105 hover:shadow-lg" data-aos="zoom-in" data-aos-delay="400">Beli REC Sekarang</a>
+                <a href="{{ route('buyer.categoryselect') }}" class="bg-green-500 hover:bg-green-600 text-white font-medium px-6 py-3 rounded-lg inline-block transition-all hover:scale-105 hover:shadow-lg" data-aos="zoom-in" data-aos-delay="400">Beli REC Sekarang</a>
             @else
                 <a href="{{ route('buyer.register') }}" class="bg-green-500 hover:bg-green-600 text-white font-medium px-6 py-3 rounded-lg inline-block transition-all hover:scale-105 hover:shadow-lg" data-aos="zoom-in" data-aos-delay="400">Daftar Sekarang</a>
             @endauth
