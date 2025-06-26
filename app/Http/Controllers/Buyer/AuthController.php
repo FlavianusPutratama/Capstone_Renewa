@@ -42,7 +42,6 @@ class AuthController extends Controller
 
     public function updateProfile(Request $request)
     {
-        // ... kode tidak berubah ...
     }
 
     /**

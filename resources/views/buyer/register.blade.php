@@ -1011,7 +1011,7 @@
        });
 
        // Fetch Provinces
-       fetch('https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json')
+       fetch('https://flavianusputratama.github.io/api-wilayah-indonesia/api/provinces.json')
            .then(response => response.json())
            .then(provinces => {
                const provinceSelect = document.getElementById('province');
@@ -1048,7 +1048,7 @@
            if (provinceId) {
                regencySelect.innerHTML = '<option value="">Memuat...</option>';
                
-               fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${provinceId}.json`)
+               fetch(`https://flavianusputratama.github.io/api-wilayah-indonesia/api/regencies/${provinceId}.json`)
                    .then(response => response.json())
                    .then(regencies => {
                        regencySelect.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
@@ -1086,7 +1086,7 @@
           if (regencyId) {
               districtSelect.innerHTML = '<option value="">Memuat...</option>';
               
-              fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/districts/${regencyId}.json`)
+              fetch(`https://flavianusputratama.github.io/api-wilayah-indonesia/api/districts/${regencyId}.json`)
                   .then(response => response.json())
                   .then(districts => {
                       districtSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
@@ -1120,7 +1120,7 @@
           if (districtId) {
               villageSelect.innerHTML = '<option value="">Memuat...</option>';
               
-              fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/villages/${districtId}.json`)
+              fetch(`https://flavianusputratama.github.io/api-wilayah-indonesia/api/villages/${districtId}.json`)
                   .then(response => response.json())
                   .then(villages => {
                       villageSelect.innerHTML = '<option value="">Pilih Kelurahan</option>';
