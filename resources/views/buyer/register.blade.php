@@ -633,7 +633,7 @@
                 <div class="text-center mt-8 pt-6 border-t border-gray-200">
                     <p class="text-gray-600 text-sm">
                         Sudah punya akun? 
-                        <a href="{{ route('buyer.login') }}" class="text-green-600 hover:text-green-700 font-semibold transition-colors">
+                        <a href="{{ route('login') }}" class="text-green-600 hover:text-green-700 font-semibold transition-colors">
                             Masuk sekarang
                         </a>
                     </p>

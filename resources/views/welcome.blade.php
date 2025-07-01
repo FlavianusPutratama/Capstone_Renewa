@@ -79,7 +79,7 @@
                 @auth
                     <a href="{{ route('buyer.categoryselect') }}" class="bg-green-500 hover:bg-green-600 text-white font-medium px-6 py-3 rounded-lg inline-block transition-all hover:scale-105 hover:shadow-lg" data-aos="zoom-in" data-aos-delay="900">Beli REC</a>
                 @else
-                    <a href="{{ route('buyer.login') }}" class="bg-green-500 hover:bg-green-600 text-white font-medium px-6 py-3 rounded-lg inline-block transition-all hover:scale-105 hover:shadow-lg" data-aos="zoom-in" data-aos-delay="900">Beli REC</a>
+                    <a href="{{ route('login') }}" class="bg-green-500 hover:bg-green-600 text-white font-medium px-6 py-3 rounded-lg inline-block transition-all hover:scale-105 hover:shadow-lg" data-aos="zoom-in" data-aos-delay="900">Beli REC</a>
                 @endauth
             </div>
             <div class="md:w-1/2">

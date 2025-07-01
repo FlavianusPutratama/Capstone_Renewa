@@ -8,8 +8,9 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
-use Illuminate\Validation\ValidationException; // Ditambahkan untuk penanganan error yang lebih spesifik
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Session;
 
 class AuthController extends Controller
@@ -40,8 +41,57 @@ class AuthController extends Controller
         return view('buyer.profile', compact('user'));
     }
 
+    /**
+     * Memperbarui informasi profil pengguna.
+     */
     public function updateProfile(Request $request)
     {
+        // 1. Ambil pengguna yang sedang login
+        $user = Auth::user();
+
+        // 2. Validasi data yang masuk
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:15',
+            // Pastikan validasi NIK unik, tapi abaikan NIK milik pengguna saat ini
+            'nik' => ['required', 'string', 'digits:16', Rule::unique('users')->ignore($user->id)],
+            'address' => 'required|string|max:255',
+            'province' => 'required|string|max:255',
+            'regency' => 'required|string|max:255',
+            'district' => 'required|string|max:255',
+            'village' => 'required|string|max:255',
+        ]);
+
+        // 3. Update data pengguna di database
+        $user->update($validatedData);
+
+        // 4. Kembalikan ke halaman profil dengan pesan sukses
+        return redirect()->route('buyer.profile.show')->with('success', 'Profil Anda berhasil diperbarui!');
+    }
+
+    /**
+     * Memperbarui password pengguna.
+     */
+    public function updatePassword(Request $request)
+    {
+        $user = Auth::user();
+
+        // Validasi
+        $request->validate([
+            'current_password' => ['required', function ($attribute, $value, $fail) use ($user) {
+                if (!Hash::check($value, $user->password)) {
+                    $fail('Password lama yang Anda masukkan salah.');
+                }
+            }],
+            'new_password' => ['required', 'string', Password::min(8)->mixedCase()->numbers(), 'confirmed'],
+        ]);
+
+        // Update password
+        $user->update([
+            'password' => Hash::make($request->new_password)
+        ]);
+
+        return redirect()->route('buyer.profile.show')->with('success', 'Password Anda berhasil diubah!');
     }
 
     /**
@@ -143,45 +193,4 @@ class AuthController extends Controller
 
         return redirect('/');
     }
-
-    // --- METHOD BARU UNTUK UPDATE PASSWORD ---
-    /**
-     * Update the user's password.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function updatePassword(Request $request)
-    {
-        // 1. Validasi Input
-        $request->validate([
-            'current_password' => ['required', 'string'],
-            'new_password' => ['required', 'string', 'min:8', 'confirmed'], 
-            // 'new_password_confirmation' akan divalidasi oleh aturan 'confirmed' pada 'new_password'
-        ]);
-
-        $user = auth()->user();
-
-        // 2. Cek apakah password lama sesuai
-        if (!Hash::check($request->current_password, $user->password)) {
-            // Jika tidak sesuai, kembali dengan pesan error spesifik untuk field current_password
-            // Ini akan ditampilkan di bawah input 'Password Lama' jika Anda menggunakan @error('current_password') di Blade
-            // throw ValidationException::withMessages([
-            //     'current_password' => 'Password lama yang Anda masukkan tidak sesuai.',
-            // ]);
-            // Alternatif: menggunakan session flash error umum
-            return back()->with('error', 'Password lama yang Anda masukkan tidak sesuai.');
-        }
-
-        // 3. Update password baru ke database
-        $user->update([
-            'password' => Hash::make($request->new_password),
-        ]);
-
-        // 4. Kembali ke halaman profil dengan pesan sukses
-        //    Penting: pastikan modal tertutup setelah submit berhasil atau error.
-        //    Menggunakan 'back()' akan mengembalikan ke halaman profil, dan pesan flash akan ditampilkan.
-        return back()->with('success', 'Password berhasil diperbarui!');
-    }
-    // -----------------------------------------
 }

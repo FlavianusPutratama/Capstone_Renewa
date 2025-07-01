@@ -3,43 +3,76 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\LoginRequest;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
+use Illuminate\Validation\ValidationException;
 
 class AuthenticatedSessionController extends Controller
 {
     /**
-     * Display the login view.
+     * Menampilkan view untuk form login.
      */
-    public function create(): View
+    public function create()
     {
+        // View ini akan kita buat di langkah berikutnya
         return view('auth.login');
     }
 
     /**
-     * Handle an incoming authentication request.
+     * Menangani permintaan login yang masuk.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(Request $request)
     {
-        $request->authenticate();
+        // 1. Validasi input
+        $credentials = $request->validate([
+            'email' => ['required', 'string', 'email'],
+            'password' => ['required', 'string'],
+        ]);
 
-        $request->session()->regenerate();
+        // 2. Coba autentikasi
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            
+            $request->session()->regenerate();
+            
+            $user = Auth::user();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+            // 3. Periksa status akun SEBELUM redirect
+            if ($user->status !== 'approved') {
+                $statusMessage = $user->status === 'pending'
+                    ? 'Akun Anda sedang dalam proses verifikasi. Silakan tunggu konfirmasi dari admin.'
+                    : 'Maaf, pendaftaran Anda telah ditolak.';
+                
+                Auth::logout(); // Logout pengguna
+                
+                return back()->withErrors(['email' => $statusMessage])->onlyInput('email');
+            }
+
+            // 4. Logika Pengalihan Cerdas (Smart Redirect)
+            $redirectPath = match ($user->role) {
+                'admin'   => route('admin.dashboard'),
+                'buyer'   => route('welcome'), // Pastikan nama rute ini benar
+                'issuer'  => route('issuer.dashboard'),
+                'generator' => '/generator/dashboard', // Ganti dengan nama rute jika sudah ada
+                default   => '/',
+            };
+
+            return redirect()->intended($redirectPath);
+        }
+
+        // Jika kredensial salah
+        return back()->withErrors([
+            'email' => 'Kredensial yang diberikan tidak cocok dengan data kami.',
+        ])->onlyInput('email');
     }
-
+    
     /**
-     * Destroy an authenticated session.
+     * Menghancurkan sesi autentikasi (logout).
      */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request)
     {
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
         return redirect('/');

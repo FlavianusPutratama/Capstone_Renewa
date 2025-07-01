@@ -3,83 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marketplace - Renewa</title>
+    <title>Marketplace - {{ $category }} - Renewa</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-gradient-to-br from-green-50 via-white to-green-100">
+<body class="bg-gray-100">
     @include('layouts.partials.navbar')
 
-    <main class="pt-32 pb-12 bg-gradient-to-br from-green-50 via-white to-green-100">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            
-            <div id="product-list-section">
-                <h2 class="text-4xl font-bold mb-6 text-center text-gray-900">
-                    Temukan Solusi Energi Terbarukan yang Tepat untuk Anda
-                </h2>
+    <main class="py-12 pt-24">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <header class="text-center mb-12">
+                <h1 class="text-4xl font-bold text-gray-800">Temukan Solusi Energi Terbarukan</h1>
+                <p class="text-lg text-gray-600 mt-2">Menampilkan pembangkit untuk kategori: <span class="font-semibold text-green-600">{{ $category }}</span></p>
+            </header>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @foreach ($products as $product)
-                    <div class="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:scale-105">
-                        <img src="{{ $product['image'] }}" alt="{{ $product['name'] }}" class="w-full h-48 object-cover">
-                        <div class="p-6 flex flex-col flex-grow">
-                            <h3 class="text-lg font-semibold text-gray-800">{{ $product['name'] }}</h3>
-                            <p class="text-gray-600 mt-2">{{ $product['description'] }}</p>
-                            <p class="text-gray-600 mt-1">Kapasitas (MW): <strong>{{ $product['capacity'] }}</strong></p>
-                            <p class="text-blue-600 mt-2">Energi Tersedia: <strong>{{ number_format($product['available_mwh'], 2, ',', '.') }} MWh</strong></p>
-                            <div class="mt-auto pt-4">
-                                <p class="text-green-600 font-bold text-xl mt-2">Rp{{ number_format($product['price'], 0, ',', '.') }}</p>
-                                <button onclick="showPurchaseDetails('{{ json_encode($product) }}')" class="mt-4 w-full text-center bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">
-                                    Beli
-                                </button>
+            @if($powerPlants->isEmpty())
+                <div class="text-center py-20 bg-white rounded-2xl shadow-md">
+                    <i class="fas fa-store-slash fa-5x text-gray-300 mb-4"></i>
+                    <h2 class="text-2xl font-semibold text-gray-600">Pembangkit Tidak Ditemukan</h2>
+                    <p class="text-gray-500 mt-2">Saat ini belum ada pembangkit yang memenuhi kriteria kategori Anda. Silakan coba kategori lain.</p>
+                    <a href="{{ route('buyer.categoryselect') }}" class="mt-6 inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg">Kembali ke Pemilihan Kategori</a>
+                </div>
+            @else
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    @foreach ($powerPlants as $powerPlant)
+                        {{-- ===== PERUBAHAN DI SINI: MEMBUNGKUS CARD DENGAN <a> DAN MENAMBAHKAN PARAMETER ===== --}}
+                        <a href="{{ route('buyer.marketplace.show', [
+                            'powerPlant' => $powerPlant->id, 
+                            'category' => request()->query('category'), 
+                            'min_purchase' => request()->query('min_purchase')
+                        ]) }}" class="group block bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transform transition-transform hover:-translate-y-2">
+                            <div class="h-48 w-full">
+                                @if($powerPlant->image_url)
+                                    <img src="{{ $powerPlant->image_url }}" alt="Foto {{ $powerPlant->name }}" class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                        <i class="fas fa-image fa-3x text-gray-400"></i>
+                                    </div>
+                                @endif
                             </div>
-                        </div>
-                    </div>
+                            <div class="p-6 flex flex-col flex-grow">
+                                <h3 class="text-xl font-bold text-gray-900 truncate group-hover:text-green-600 transition" title="{{ $powerPlant->name }}">{{ $powerPlant->name }}</h3>
+                                <div class="mt-2">
+                                    <p class="text-sm text-gray-600">Sumber energi: <span class="font-semibold">{{ $powerPlant->energy_type }}</span></p>
+                                </div>
+                                <div class="mt-4 pt-4 border-t border-gray-200 flex-grow">
+                                    <p class="text-sm text-gray-600">Energi Tersedia:</p>
+                                    <p class="font-bold text-green-600 text-lg">{{ number_format($powerPlant->certificates_sum_amount_mwh, 2, ',', '.') }} MWh</p>
+                                </div>
+                                <div class="mt-4 flex justify-between items-center">
+                                     <p class="text-xl font-bold text-gray-800">Rp35.000 <span class="text-sm font-normal text-gray-500">/ MWh</span></p>
+                                     <span class="bg-green-500 text-white font-bold py-2 px-6 rounded-lg transition-all group-hover:bg-green-600">
+                                        Lihat Detail
+                                     </span>
+                                </div>
+                            </div>
+                        </a>
+                        {{-- ================================================================================= --}}
                     @endforeach
-                </div>                        
-            </div>
-
-            <div id="purchase-section" class="hidden">
-            </div>
+                </div>
+            @endif
         </div>
-    </main>              
+    </main>
 
-    <footer class="bg-gray-800 text-white py-12 mt-16">
-        <div class="container mx-auto px-4 text-center">
-            <p class="text-gray-400">© 2025 Renewa Indonesia. Seluruh hak dilindungi undang-undang.</p>
-        </div>
+    <footer class="text-center py-8 mt-12 text-gray-500 text-sm">
+        © {{ date('Y') }} Renewa Indonesia. Seluruh hak dilindungi undang-undang.
     </footer>
-
-    <script>
-        const productListSection = document.getElementById('product-list-section');
-        const purchaseSection = document.getElementById('purchase-section');
-
-        function showPurchaseDetails(productJson) {
-            // Konversi string JSON dari data produk menjadi objek
-            const product = JSON.parse(productJson);
-            
-            // Mengisi data ke elemen-elemen di bagian pembelian
-            document.getElementById('purchase-img').src = product.image;
-            document.getElementById('purchase-name').innerText = product.name;
-            document.getElementById('purchase-description').innerText = product.description;
-            document.getElementById('purchase-capacity').innerText = product.capacity;
-            
-            // Format harga ke format Rupiah
-            document.getElementById('purchase-price').innerText = 'Rp' + new Intl.NumberFormat('id-ID').format(product.price);
-
-            // Menyembunyikan daftar produk dan menampilkan bagian pembelian
-            productListSection.classList.add('hidden');
-            purchaseSection.classList.remove('hidden');
-
-            // Scroll ke atas halaman agar pengguna langsung melihat form pembelian
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function backToList() {
-            // Menyembunyikan bagian pembelian dan menampilkan kembali daftar produk
-            purchaseSection.classList.add('hidden');
-            productListSection.classList.remove('hidden');
-        }
-    </script>
-
 </body>
 </html>

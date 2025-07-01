@@ -2,99 +2,103 @@
 
 // routes/web.php
 
-// Namespace tidak diperlukan di sini jika file ini berada di root 'routes'
-// namespace routes\web; 
-
-use App\Http\Controllers\ProfileController; // Ini mungkin tidak terpakai jika Anda menggunakan BuyerAuthController untuk semua profil buyer
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Buyer\AuthController as BuyerAuthController;
 use App\Http\Controllers\Issuer\AuthController as IssuerAuthController;
+use App\Http\Controllers\Generator\AuthController as GeneratorAuthController;
 use App\Http\Controllers\Buyer\MarketplaceController;
-use App\Http\Middleware\CheckRole;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Buyer\ProductDetailController;
+use App\Http\Controllers\Buyer\CheckoutController;
+use App\Http\Controllers\Generator\PowerPlantController; 
+use App\Http\Controllers\Admin\VerificationController;
 
+
+// ===== PUBLIC ROUTES =====
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('welcome');
 
-// Buyer Authentication Routes
-Route::middleware('guest')->group(function () {
-    Route::get('/buyer/login', [BuyerAuthController::class, 'showLoginForm'])->name('buyer.login');
-    Route::post('/buyer/login', [BuyerAuthController::class, 'login']);
-    Route::get('/buyer/register', [BuyerAuthController::class, 'showRegistrationForm'])->name('buyer.register');
-    Route::post('/buyer/register', [BuyerAuthController::class, 'register']);
-});
-
-// Protected Buyer Routes
-Route::middleware(['auth', 'App\Http\Middleware\CheckRole:buyer'])->prefix('buyer')->group(function () {
-    Route::get('/checkout', function () {
-        return view('buyer.checkout');
-    })->name('buyer.checkout');
-
-    Route::get('/categoryselect', function () {
-        return view('buyer.categoryselect');
-    })->name('buyer.categoryselect');
-
-    Route::get('/dashboard', function () {
-        return view('dashboard'); // Pastikan view 'dashboard' ini ada atau sesuaikan path-nya
-    })->name('dashboard');
-
-    // Profile routes
-    Route::get('/profile', [BuyerAuthController::class, 'showProfile'])->name('profile.show');
-    Route::post('/profile', [BuyerAuthController::class, 'updateProfile'])->name('profile.update');
-    Route::get('/profile/edit', [BuyerAuthController::class, 'showProfile'])->name('profile.edit'); // Biasanya ini juga mengarah ke form edit atau showProfile yang sama
-
-    // --- TAMBAHKAN ROUTE BARU UNTUK UPDATE PASSWORD DI SINI ---
-    Route::post('/profile/password', [BuyerAuthController::class, 'updatePassword'])->name('profile.updatePassword');
-    // ---------------------------------------------------------
-});
-
-// Issuer Authentication Routes
-Route::middleware('guest')->group(function () {
-    Route::get('/issuer/login', [IssuerAuthController::class, 'showLoginForm'])->name('issuer.login');
-    Route::post('/issuer/login', [IssuerAuthController::class, 'login']);   
-    Route::get('/issuer/register', [IssuerAuthController::class, 'showRegistrationForm'])->name('issuer.register');
-    Route::post('/issuer/register', [IssuerAuthController::class, 'register']);
-});
-
-// Protected Issuer Routes
-// Perbaiki 'role:issuer' menjadi 'App\Http\Middleware\CheckRole:issuer' jika middleware Anda seperti itu
-Route::middleware(['auth', 'App\Http\Middleware\CheckRole:issuer'])->prefix('issuer')->group(function () { 
-    Route::get('/dashboard', function () {
-        return view('issuer.dashboard');
-    })->name('issuer.dashboard');
-});
-
-// Auth routes for both
-Route::middleware('auth')->group(function () {
-    Route::post('/logout', function() {
-        // Pastikan method isIssuer() ada di model User Anda atau sesuaikan logikanya
-        if (auth()->user()->role === 'issuer') { // Contoh jika Anda memiliki kolom 'role'
-            return app()->make(IssuerAuthController::class)->logout(request());
-        } else {
-            return app()->make(BuyerAuthController::class)->logout(request());
-        }
-    })->name('logout');
-});
-
-// Generatormap Route
 Route::get('/generatormap', function () {
     return view('generatormap');
 })->name('generatormap');
 
-// Marketplace Route
-Route::match(['get', 'post'], '/buyer/marketplace', [MarketplaceController::class, 'index'])->name('marketplace');
+// ... Rute publik lainnya jika ada ...
 
-// Welcome Page Route
-Route::get('/welcome', function () {
-    return view('welcome');
-})->name('welcome');
 
-// Routes untuk kompatibilitas (redirect ke modal)
-Route::get('/terms', function () {
-    return redirect()->route('buyer.register')->with('openModal', 'terms');
-})->name('terms');
+// ===== AUTHENTICATION & REGISTRATION ROUTES =====
+Route::middleware('guest')->group(function () {
+    // Satu Pintu Login Universal
+    Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
-Route::get('/privacy', function () {
-    return redirect()->route('buyer.register')->with('openModal', 'privacy');  
-})->name('privacy');
+    // Rute Registrasi tetap terpisah
+    Route::get('/buyer/register', [BuyerAuthController::class, 'showRegistrationForm'])->name('buyer.register');
+    Route::post('/buyer/register', [BuyerAuthController::class, 'register']);
+
+    Route::get('/issuer/register', [IssuerAuthController::class, 'showRegistrationForm'])->name('issuer.register');
+    Route::post('/issuer/register', [IssuerAuthController::class, 'register']);
+
+    Route::get('/generator/register', [GeneratorAuthController::class, 'showRegistrationForm'])->name('generator.register');
+    Route::post('/generator/register', [GeneratorAuthController::class, 'register']);
+});
+
+Route::middleware('auth')->group(function () {
+    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+});
+
+
+// ===== PROTECTED BUYER ROUTES =====
+Route::middleware(['auth', 'App\Http\Middleware\CheckRole:buyer'])->prefix('buyer')->name('buyer.')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard'); // Pastikan ini view dashboard buyer
+    })->name('dashboard');
+    
+    Route::get('/categoryselect', function () {
+        return view('buyer.categoryselect');
+    })->name('categoryselect');
+
+    Route::match(['get', 'post'], '/marketplace', [MarketplaceController::class, 'index'])->name('marketplace');
+    Route::get('/marketplace/{powerPlant}', [ProductDetailController::class, 'show'])->name('marketplace.show');
+
+    Route::get('/orders/{order}', [CheckoutController::class, 'showOrder'])->name('orders.show');
+    Route::post('/checkout', [CheckoutController::class, 'processOrder'])->name('checkout.process');
+    Route::post('/orders/{order}/confirm', [CheckoutController::class, 'confirmPayment'])->name('orders.confirm');
+
+    Route::get('/profile', [BuyerAuthController::class, 'showProfile'])->name('profile.show');
+    Route::post('/profile', [BuyerAuthController::class, 'updateProfile'])->name('profile.update');
+    Route::get('/profile/edit', [BuyerAuthController::class, 'showProfile'])->name('profile.edit');
+    Route::post('/profile/password', [BuyerAuthController::class, 'updatePassword'])->name('profile.updatePassword');
+});
+
+
+// ===== PROTECTED ISSUER ROUTES =====
+Route::middleware(['auth', 'App\Http\Middleware\CheckRole:issuer'])->prefix('issuer')->name('issuer.')->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\Issuer\DashboardController::class, 'index'])->name('dashboard');
+    // Rute untuk menangani aksi penerbitan sertifikat
+    Route::post('/reports/{report}/issue', [App\Http\Controllers\Issuer\CertificateController::class, 'issue'])->name('reports.issue');
+    Route::post('/reports/{report}/reject', [App\Http\Controllers\Issuer\CertificateController::class, 'reject'])->name('reports.reject');
+
+    Route::put('/power-plants/{powerPlant}', [PowerPlantController::class, 'update'])->name('power-plant.update');
+
+    Route::post('/orders/{order}/approve-payment', [App\Http\Controllers\Issuer\CertificateController::class, 'approvePayment'])->name('orders.approvePayment');
+    Route::post('/orders/{order}/reject-payment', [App\Http\Controllers\Issuer\CertificateController::class, 'rejectPayment'])->name('orders.rejectPayment');
+});
+
+
+// ===== PROTECTED GENERATOR ROUTES =====
+Route::middleware(['auth', 'App\Http\Middleware\CheckRole:generator'])->prefix('generator')->name('generator.')->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\Generator\DashboardController::class, 'index'])->name('dashboard');
+    Route::post('/reports', [App\Http\Controllers\Generator\EnergyReportController::class, 'store'])->name('reports.store');
+    Route::put('/power-plants/{powerPlant}', [App\Http\Controllers\Generator\PowerPlantController::class, 'update'])->name('power-plant.update');
+    Route::put('/power-plants/{powerPlant}', [PowerPlantController::class, 'update'])->name('power-plant.update');
+});
+
+
+// ===== PROTECTED ADMIN ROUTES =====
+Route::middleware(['auth', 'App\Http\Middleware\CheckRole:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\Admin\VerificationController::class, 'index'])->name('dashboard');
+    Route::get('/users/{userId}/details-json', [App\Http\Controllers\Admin\VerificationController::class, 'getJsonDetails'])->name('users.getJsonDetails');
+    Route::post('/users/{user}/approve', [App\Http\Controllers\Admin\VerificationController::class, 'approve'])->name('users.approve');
+    Route::post('/users/{user}/reject', [App\Http\Controllers\Admin\VerificationController::class, 'reject'])->name('users.reject');
+});

@@ -274,7 +274,7 @@
                     <span>Beli REC Sekarang</span>
                 </a>
             @else
-                <a href="{{ route('buyer.login') }}" class="modern-btn flex items-center space-x-3">
+                <a href="{{ route('login') }}" class="modern-btn flex items-center space-x-3">
                     <i class="fas fa-shopping-cart"></i>
                     <span>Beli REC Sekarang</span>
                 </a>

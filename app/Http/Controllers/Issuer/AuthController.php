@@ -4,57 +4,12 @@ namespace App\Http\Controllers\Issuer;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Providers\RouteServiceProvider;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 
 class AuthController extends Controller
 {
-    /**
-     * Display the issuer login view.
-     *
-     * @return \Illuminate\View\View
-     */
-    public function showLoginForm()
-    {
-        return view('issuer.login');
-    }
-
-    /**
-     * Handle an incoming authentication request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function login(Request $request)
-    {
-        $request->validate([
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
-        ]);
-
-        if (Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
-            $request->session()->regenerate();
-
-            // Ensure the user is an issuer
-            if (Auth::user()->isIssuer()) {
-                return redirect()->intended(route('issuer.dashboard'));
-            } else {
-                Auth::logout();
-                return back()->withErrors([
-                    'email' => 'Kredensial ini tidak memiliki akses sebagai penerbit.',
-                ]);
-            }
-        }
-
-        return back()->withErrors([
-            'email' => __('Email atau password yang Anda masukkan tidak valid.'),
-        ])->onlyInput('email');
-    }
-
     /**
      * Display the issuer registration view.
      *
@@ -74,13 +29,19 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'company_name' => ['required', 'string', 'max:255'],
+            'nib' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255'], // Nama PIC
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'phone' => ['required', 'string', 'max:15'],
-            'company_name' => ['required', 'string', 'max:255'],
+            'legal_document' => ['required', 'file', 'mimes:pdf', 'max:2048'], // Validasi file PDF maks 2MB
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'terms' => ['required', 'accepted'],
         ]);
+
+        // Simpan dokumen yang diunggah ke disk 'public'
+        // Ini akan menyimpan file di storage/app/public/issuer_documents
+        $documentPath = $request->file('legal_document')->store('issuer_documents', 'public');
 
         $user = User::create([
             'name' => $request->name,
@@ -88,28 +49,22 @@ class AuthController extends Controller
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
             'role' => 'issuer',
+            'status' => 'pending',
+            // Anda perlu menambahkan kolom baru di migrasi dan model User jika belum ada.
+            // Contoh: 'legal_document_path' => $documentPath,
+            // 'company_name' => $request->company_name,
+            // 'nib' => $request->nib,
         ]);
 
-        event(new Registered($user));
+        // Simpan data tambahan ke tabel terpisah atau tambahkan kolom di tabel 'users'
+        // Contoh:
+        // $user->issuerProfile()->create([
+        //     'company_name' => $request->company_name,
+        //     'nib' => $request->nib,
+        //     'legal_document_path' => $documentPath,
+        // ]);
 
-        Auth::login($user);
 
-        return redirect(route('issuer.dashboard'));
-    }
-
-    /**
-     * Log the user out of the application.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function logout(Request $request)
-    {
-        Auth::logout();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect('/');
+        return redirect()->route('login')->with('status', 'Pendaftaran Anda telah diterima. Akun akan diaktifkan setelah proses verifikasi oleh administrator selesai.');
     }
 }
