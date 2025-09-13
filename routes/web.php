@@ -1,7 +1,5 @@
 <?php
 
-// routes/web.php
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Buyer\AuthController as BuyerAuthController;
@@ -101,4 +99,6 @@ Route::middleware(['auth', 'App\Http\Middleware\CheckRole:admin'])->prefix('admi
     Route::get('/users/{userId}/details-json', [App\Http\Controllers\Admin\VerificationController::class, 'getJsonDetails'])->name('users.getJsonDetails');
     Route::post('/users/{user}/approve', [App\Http\Controllers\Admin\VerificationController::class, 'approve'])->name('users.approve');
     Route::post('/users/{user}/reject', [App\Http\Controllers\Admin\VerificationController::class, 'reject'])->name('users.reject');
+    Route::get('/admin/documents/{user}', [VerificationController::class, 'showDocument'])
+        ->name('admin.documents.show');
 });

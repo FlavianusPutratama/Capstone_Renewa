@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response;
 
 class VerificationController extends Controller
 {
@@ -89,5 +91,35 @@ class VerificationController extends Controller
         $user->status = 'rejected';
         $user->save();
         return redirect()->route('admin.dashboard')->with('success', 'Pendaftaran ' . $user->name . ' telah ditolak.');
+    }
+
+    public function showDocument(User $user)
+    {
+        // Tentukan sumber path sesuai role
+        if ($user->role === 'issuer') {
+            // Asumsikan dokumen issuer tersimpan di relasi issuerProfile. 
+            // Ganti nama field sesuai skema kamu, mis: legal_document_path
+            $path = optional($user->issuerProfile)->legal_document_path;
+        } elseif ($user->role === 'generator') {
+            // Contoh jika dokumen generator ada di power plant terbaru (sesuaikan dengan proyekmu)
+            $path = optional($user->powerPlants()->latest()->first())->operational_permit_path;
+        } else {
+            abort(404);
+        }
+
+        // Handle data lama: bisa jadi yang tersimpan URL penuh
+        if ($path && Str::startsWith($path, ['http://', 'https://'])) {
+            return redirect()->away($path);
+        }
+
+        // Normalisasi path yang mungkin tersimpan sebagai "storage/..."
+        $normalized = $path ? Str::replaceFirst('storage/', '', $path) : null;
+
+        if (!$normalized || !Storage::disk('public')->exists($normalized)) {
+            abort(Response::HTTP_NOT_FOUND, 'Document not found.');
+        }
+
+        // Tampilkan langsung di browser (application/pdf)
+        return Storage::disk('public')->response($normalized);
     }
 }

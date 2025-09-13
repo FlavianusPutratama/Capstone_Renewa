@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Buyer;
 
 use App\Http\Controllers\Controller;
 use App\Models\PowerPlant;
-use Illuminate\Http\Request; // <-- Tambahkan import ini
+use Illuminate\Http\Request;
 
 class ProductDetailController extends Controller
 {

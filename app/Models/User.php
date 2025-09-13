@@ -55,7 +55,6 @@ class User extends Authenticatable
         ];
     }
 
-    // ... (relasi-relasi yang sudah ada)
     public function powerPlants(): HasMany
     {
         return $this->hasMany(PowerPlant::class);
