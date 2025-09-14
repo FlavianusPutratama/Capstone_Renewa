@@ -65,11 +65,12 @@
         }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 overflow-x-hidden">
     @include('layouts.partials.navbar')
+    <div class="overflow-hidden">
 
     <!-- Hero Section -->
-    <section class="py-16 bg-[#EAEAEA] mt-20">
+    <section class="py-16 bg-[#EAEAEA] mt-20 w-full">
         <div class="container mx-auto px-4 flex flex-col md:flex-row items-center">
             <div class="md:w-1/2 mb-10 md:mb-0">
                 <h1 class="text-4xl font-bold leading-tight mb-4 hero-fade-in">
@@ -89,7 +90,7 @@
     </section>
 
     <!-- Klien Section -->
-    <section class="py-12 bg-white">
+    <section class="py-12 bg-white w-full">
         <div class="container mx-auto px-4 text-center">
             <h2 class="text-2xl font-bold mb-2" data-aos="fade-up">Klien Kami</h2>
             <p class="text-gray-600 mb-8" data-aos="fade-up" data-aos-delay="200">Terima Kasih Atas Kontribusi Anda Terhadap Pengembangan Energi Terbarukan di Indonesia</p>
@@ -117,7 +118,7 @@
     </section>
 
     <!-- Peran REC Section -->
-    <section class="py-16 bg-gray-50">
+    <section class="py-16 bg-gray-50 w-full">
         <div class="container mx-auto px-4">
             <h2 class="text-3xl font-bold text-center mb-12" data-aos="fade-up">Apa Saja Peran REC?</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -153,7 +154,7 @@
     </section>
 
     <!-- Data dan Peta Section -->
-    <section class="py-16 bg-white">git
+    <section class="py-16 bg-white w-full">
         <div class="container mx-auto px-4">
             <div class="flex flex-col md:flex-row items-center">
                 <div class="md:w-1/2 mb-10 md:mb-0" data-aos="fade-right" data-aos-duration="1000">
@@ -169,7 +170,7 @@
     </section>
 
     <!-- Potensi Energi Section -->
-    <section class="py-16 bg-gray-50" id="statistics-section">
+    <section class="py-16 bg-gray-50 w-full" id="statistics-section">
         <div class="container mx-auto px-4 text-center">
             <h2 class="text-2xl font-bold mb-1" data-aos="fade-up">Potensi <span class="text-green-500">Energi Baru Terbarukan (EBT)</span> di Indonesia</h2>
             <p class="text-gray-600 mb-12" data-aos="fade-up" data-aos-delay="200">Kapasitas cadangan besar potensi EBT di Indonesia</p>
@@ -225,7 +226,7 @@
     </section>
 
     <!-- Testimonial Section -->
-    <section class="py-16 bg-white">
+    <section class="py-16 bg-white w-full">
         <div class="container mx-auto px-4">
             <div class="max-w-3xl mx-auto bg-gray-100 rounded-2xl overflow-hidden hover-lift" data-aos="zoom-in" data-aos-duration="1000">
                 <div class="flex flex-col md:flex-row">
@@ -248,7 +249,7 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="py-16 bg-gray-50">
+    <section class="py-16 bg-gray-50 w-full">
         <div class="container mx-auto px-4 text-center">
             <h2 class="text-3xl font-bold mb-4" data-aos="fade-up">Peduli adalah pemasaran baru</h2>
             <p class="text-gray-600 max-w-2xl mx-auto mb-8" data-aos="fade-up" data-aos-delay="200">Bergabunglah dengan komunitas yang peduli terhadap masa depan planet kita. Lihat bagaimana kontribusi Anda dapat membuat perbedaan nyata untuk lingkungan dan masyarakat.</p>
