@@ -62,6 +62,7 @@ Route::middleware(['auth', 'App\Http\Middleware\CheckRole:buyer'])->prefix('buye
     Route::get('/orders/{order}', [CheckoutController::class, 'showOrder'])->name('orders.show');
     Route::post('/checkout', [CheckoutController::class, 'processOrder'])->name('checkout.process');
     Route::post('/orders/{order}/confirm', [CheckoutController::class, 'confirmPayment'])->name('orders.confirm');
+    // Route::post('/checkout', [CheckoutController::class, 'processOrder'])->name('buyer.checkout.process');
 
     Route::get('/profile', [BuyerAuthController::class, 'showProfile'])->name('profile.show');
     Route::post('/profile', [BuyerAuthController::class, 'updateProfile'])->name('profile.update');

@@ -35,15 +35,25 @@ class CheckoutController extends Controller
         }
 
         try {
+            // Memulai transaksi database untuk menjaga konsistensi data
             $order = DB::transaction(function () use ($powerPlant, $quantityNeeded, $pricePerMwh) {
-                // Verifikasi stok
-                $certificatesToReserve = $powerPlant->certificates()->where('certificates.status', 'available_for_sale')->lockForUpdate()->orderBy('created_at', 'asc')->get();
-                $availableMwh = $certificatesToReserve->sum('certificates.amount_mwh');
+                
+                // KUNCI PERBAIKAN: Secara eksplisit menyebutkan nama tabel 'certificates'
+                $certificatesToReserve = $powerPlant->certificates()
+                                                    ->where('certificates.status', 'available_for_sale') // INI PERBAIKANNYA
+                                                    ->lockForUpdate()
+                                                    ->orderBy('certificates.created_at', 'asc') // Dibuat eksplisit juga
+                                                    ->get();
+
+                // Hitung total MWh yang benar-benar tersedia
+                $availableMwh = $certificatesToReserve->sum('amount_mwh');
+                
+                // Jika stok tidak cukup, batalkan transaksi
                 if ($availableMwh < $quantityNeeded) {
                     throw new \Exception('Maaf, stok energi yang tersedia hanya ' . number_format($availableMwh, 2, ',', '.') . ' MWh.');
                 }
 
-                // Buat pesanan (Order)
+                // Buat pesanan (Order) baru
                 $newOrder = Order::create([
                     'order_uid' => 'REC-TRX-' . strtoupper(Str::random(10)),
                     'buyer_id' => Auth::id(),
@@ -55,9 +65,11 @@ class CheckoutController extends Controller
                 // Amankan sertifikat
                 $mwhReserved = 0;
                 foreach ($certificatesToReserve as $certificate) {
-                    if ($mwhReserved >= $quantityNeeded) break;
+                    if ($mwhReserved >= $quantityNeeded) {
+                        break;
+                    }
                     $certificate->status = 'on_hold';
-                    $certificate->order_id = $newOrder->id; // Hubungkan sertifikat ke pesanan
+                    $certificate->order_id = $newOrder->id;
                     $certificate->save();
                     $mwhReserved += $certificate->amount_mwh;
                 }
@@ -66,9 +78,11 @@ class CheckoutController extends Controller
             });
 
         } catch (\Exception $e) {
+            // Kembali dengan pesan error jika transaksi gagal
             return redirect()->back()->with('error', $e->getMessage());
         }
 
+        // Arahkan ke halaman pembayaran jika berhasil
         return redirect()->route('buyer.orders.show', $order->id)->with('success', 'Pesanan berhasil dibuat! Silakan lanjutkan pembayaran.');
     }
 

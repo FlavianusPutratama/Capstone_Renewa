@@ -4,38 +4,38 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany; // Import HasMany
 
 class Order extends Model
 {
     use HasFactory;
 
+    /**
+     * Atribut yang boleh diisi secara massal.
+     *
+     * @var array
+     */
     protected $fillable = [
         'order_uid',
         'buyer_id',
-        // 'certificate_id', // Dihapus dari sini
+        // 'certificate_id', // <-- HAPUS BARIS INI
         'total_price',
         'virtual_account_number',
         'status',
-        'payment_confirmed_at',
-        'order_completed_at',
     ];
 
-    protected $casts = [
-        'payment_confirmed_at' => 'datetime',
-        'order_completed_at' => 'datetime',
-    ];
-
-    public function buyer(): BelongsTo
+    /**
+     * Relasi ke user (pembeli).
+     */
+    public function buyer()
     {
         return $this->belongsTo(User::class, 'buyer_id');
     }
 
     /**
-     * Mendefinisikan relasi bahwa satu pesanan bisa memiliki banyak sertifikat.
+     * Relasi ke sertifikat-sertifikat yang dimiliki order ini.
+     * (Satu order bisa punya BANYAK sertifikat)
      */
-    public function certificates(): HasMany
+    public function certificates()
     {
         return $this->hasMany(Certificate::class);
     }

@@ -55,7 +55,7 @@
 
                         {{-- Formulir Pembelian --}}
                         <div class="mt-8">
-                            <form action="#" method="POST"> 
+                            <form action="{{ route('buyer.checkout.process') }}" method="POST"> 
                                 @csrf
                                 <input type="hidden" name="power_plant_id" value="{{ $powerPlant->id }}">
                                 <input type="hidden" name="min_purchase" value="{{ $minPurchase }}">
@@ -98,7 +98,6 @@
                 totalPriceDisplay.textContent = 'Rp ' + total.toLocaleString('id-ID');
             }
             
-            // Hitung saat halaman dimuat
             calculateTotal();
 
             quantityInput.addEventListener('input', calculateTotal);
