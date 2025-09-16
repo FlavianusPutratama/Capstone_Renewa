@@ -17,14 +17,25 @@ class Order extends Model
     protected $fillable = [
         'order_uid',
         'buyer_id',
-        // 'certificate_id', // <-- HAPUS BARIS INI
         'total_price',
         'virtual_account_number',
         'status',
     ];
 
     /**
-     * Relasi ke user (pembeli).
+     * Memberitahu Laravel untuk selalu memperlakukan kolom-kolom ini
+     * sebagai objek tanggal (Carbon), yang mencegah error format().
+     *
+     * @var array
+     */
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'payment_confirmed_at' => 'datetime',
+    ];
+
+    /**
+     * Mendefinisikan relasi bahwa pesanan ini dimiliki oleh satu User (pembeli).
      */
     public function buyer()
     {
@@ -32,8 +43,7 @@ class Order extends Model
     }
 
     /**
-     * Relasi ke sertifikat-sertifikat yang dimiliki order ini.
-     * (Satu order bisa punya BANYAK sertifikat)
+     * Mendefinisikan relasi bahwa satu pesanan dapat memiliki banyak sertifikat.
      */
     public function certificates()
     {

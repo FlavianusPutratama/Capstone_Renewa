@@ -8,28 +8,24 @@ use App\Models\Certificate;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
-    /**
-     * Menampilkan data utama di dashboard issuer.
-     */
     public function index()
     {
-        // 1. Ambil laporan energi yang perlu diverifikasi
         $pendingReports = EnergyReport::with(['powerPlant.user'])
             ->where('status', 'pending_verification')
             ->orderBy('created_at', 'asc')
             ->get();
 
-        // 2. Ambil pesanan yang pembayarannya perlu diverifikasi
-        // PERBAIKAN: Mengubah 'certificate' menjadi 'certificates'
-        $pendingOrders = Order::with(['buyer', 'certificates.energyReport.powerPlant'])
-            ->where('status', 'awaiting_confirmation')
+        $pendingOrders = Order::where('status', 'awaiting_confirmation')
+            ->whereHas('certificates.energyReport.powerPlant')
+            ->with(['buyer', 'certificates.energyReport.powerPlant'])
             ->orderBy('created_at', 'asc')
             ->get();
 
-        // 3. Hitung statistik
         $recIssuedThisMonth = Certificate::whereYear('created_at', Carbon::now()->year)
                                           ->whereMonth('created_at', Carbon::now()->month)
                                           ->sum('amount_mwh');
@@ -44,24 +40,32 @@ class DashboardController extends Controller
     }
 
     /**
-     * FUNGSI BARU: Memverifikasi pembayaran sebuah pesanan.
+     * VERSI FINAL: Memverifikasi pembayaran dengan mem-bypass Route-Model Binding.
      */
-    public function verifyPayment(Order $order)
+    public function verifyPayment($orderId)
     {
-        // Memastikan order ada dan statusnya 'awaiting_confirmation'
-        if ($order && $order->status == 'awaiting_confirmation') {
-            
-            // Mengubah status order menjadi 'completed'
+        DB::beginTransaction();
+        try {
+            // Cari Order secara manual menggunakan ID, sama seperti di tes diagnostik.
+            $order = Order::findOrFail($orderId);
+
+            if ($order->status !== 'awaiting_confirmation') {
+                throw new \Exception('Pesanan ini tidak lagi dalam status menunggu konfirmasi.');
+            }
+
+            // Jalankan logika yang sudah terbukti benar.
+            $order->certificates()->update(['status' => 'sold']);
             $order->status = 'completed';
+            $order->payment_confirmed_at = Carbon::now();
             $order->save();
 
-            // PERBAIKAN: Menggunakan relasi 'certificates' (jamak) untuk update
-            // Ini akan mengubah status SEMUA sertifikat yang terkait menjadi 'sold'
-            $order->certificates()->update(['status' => 'sold']);
+            DB::commit();
 
             return redirect()->route('issuer.dashboard')->with('success', 'Pembayaran untuk pesanan ' . $order->order_uid . ' telah berhasil diverifikasi.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error("Verifikasi Gagal untuk Order ID: {$orderId}. Pesan: " . $e->getMessage());
+            return redirect()->route('issuer.dashboard')->with('error', 'Gagal menyelesaikan transaksi. Terjadi kesalahan: ' . $e->getMessage());
         }
-
-        return redirect()->route('issuer.dashboard')->with('error', 'Pesanan tidak ditemukan atau sudah diverifikasi.');
     }
 }

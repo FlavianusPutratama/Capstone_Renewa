@@ -74,14 +74,14 @@ Route::middleware(['auth', 'App\Http\Middleware\CheckRole:buyer'])->prefix('buye
 // ===== PROTECTED ISSUER ROUTES =====
 Route::middleware(['auth', 'App\Http\Middleware\CheckRole:issuer'])->prefix('issuer')->name('issuer.')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Issuer\DashboardController::class, 'index'])->name('dashboard');
-    // Rute untuk menangani aksi penerbitan sertifikat
+
     Route::post('/reports/{report}/issue', [App\Http\Controllers\Issuer\CertificateController::class, 'issue'])->name('reports.issue');
     Route::post('/reports/{report}/reject', [App\Http\Controllers\Issuer\CertificateController::class, 'reject'])->name('reports.reject');
 
     Route::put('/power-plants/{powerPlant}', [PowerPlantController::class, 'update'])->name('power-plant.update');
 
-    Route::post('/orders/{order}/approve-payment', [App\Http\Controllers\Issuer\CertificateController::class, 'approvePayment'])->name('orders.approvePayment');
-    Route::post('/orders/{order}/reject-payment', [App\Http\Controllers\Issuer\CertificateController::class, 'rejectPayment'])->name('orders.rejectPayment');
+    Route::post('/orders/{orderId}/approve', [App\Http\Controllers\Issuer\DashboardController::class, 'verifyPayment'])->name('orders.approvePayment');
+    Route::post('/orders/{orderId}/reject', [App\Http\Controllers\Issuer\DashboardController::class, 'rejectPayment'])->name('orders.rejectPayment');
 });
 
 

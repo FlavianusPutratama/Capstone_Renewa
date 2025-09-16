@@ -23,19 +23,18 @@ class EnergyReportController extends Controller
             'power_plant_id' => 'required|exists:power_plants,id',
             'reporting_period_start' => 'required|date',
             'reporting_period_end' => 'required|date|after_or_equal:reporting_period_start',
-            'amount_mwh' => 'required|numeric|min:0',
-            'supporting_document' => 'nullable|file|mimes:pdf|max:2048', // Opsional, maks 2MB
+            'amount_mwh' => 'required|numeric|min:0', // <-- PERBAIKAN
+            'supporting_document' => 'nullable|file|mimes:pdf|max:2048',
         ]);
 
-        // 2. Otorisasi: Pastikan pembangkit ini milik pengguna yang login
+        // 2. Otorisasi
         $powerPlant = PowerPlant::findOrFail($validated['power_plant_id']);
         if ($powerPlant->user_id !== Auth::id()) {
-            // Jika bukan pemilik, tolak akses
             return back()->with('error', 'Anda tidak memiliki izin untuk melaporkan produksi untuk pembangkit ini.');
         }
 
         $documentPath = null;
-        // 3. Jika ada dokumen, simpan
+        // 3. Simpan dokumen jika ada
         if ($request->hasFile('supporting_document')) {
             $documentPath = $request->file('supporting_document')->store('report_documents', 'public');
         }
@@ -45,12 +44,12 @@ class EnergyReportController extends Controller
             'power_plant_id' => $validated['power_plant_id'],
             'reporting_period_start' => $validated['reporting_period_start'],
             'reporting_period_end' => $validated['reporting_period_end'],
-            'amount_mwh' => $validated['amount_mwh'],
+            'amount_mwh' => $validated['amount_mwh'], // <-- PERBAIKAN
             'supporting_document_path' => $documentPath,
-            'status' => 'pending_verification', // Status awal
+            'status' => 'pending_verification',
         ]);
 
-        // 5. Kembalikan ke dasbor dengan pesan sukses
+        // 5. Kembalikan ke dasbor
         return redirect()->route('generator.dashboard')->with('success', 'Laporan produksi energi berhasil diajukan dan sedang menunggu verifikasi.');
     }
 }

@@ -20,7 +20,6 @@
     </style>
 </head>
 <body class="font-sans antialiased bg-gray-100">
-    {{-- Inisialisasi Alpine.js untuk Tab --}}
     <div x-data="{ activeTab: 'reports' }" class="min-h-screen">
         @include('layouts.partials.navbar')
 
@@ -65,7 +64,6 @@
                     </div>
 
                     <div class="bg-white overflow-hidden shadow-xl sm:rounded-2xl">
-                        <!-- Tab 1: Verifikasi Laporan Energi -->
                         <div x-show="activeTab === 'reports'" x-cloak class="p-6 md:p-8">
                             <h3 class="text-2xl font-bold text-gray-800 mb-6">Antrian Verifikasi Laporan Produksi</h3>
                             @if($pendingReports->isEmpty())
@@ -88,7 +86,6 @@
                             @endif
                         </div>
                         
-                        <!-- Tab 2: Verifikasi Pembayaran -->
                         <div x-show="activeTab === 'payments'" x-cloak class="p-6 md:p-8" style="display: none;">
                             <h3 class="text-2xl font-bold text-gray-800 mb-6">Antrian Konfirmasi Pembayaran</h3>
                             @if($pendingOrders->isEmpty())
@@ -101,7 +98,20 @@
                                             @foreach($pendingOrders as $order)
                                             <tr class="hover:bg-blue-50/50">
                                                 <td class="px-6 py-4"><div class="font-medium">{{ $order->buyer->name }}</div><div class="text-sm text-gray-500">#{{ $order->order_uid }}</div></td>
-                                                <td class="px-6 py-4"><div class="font-bold">Rp {{ number_format($order->total_price, 0, ',', '.') }}</div><div class="text-sm text-gray-500">Dikonfirmasi pada: {{ $order->payment_confirmed_at->format('d M Y, H:i') }}</div></td>
+                                                
+                                                <td class="px-6 py-4">
+                                                    <div class="font-bold">Rp {{ number_format($order->total_price, 0, ',', '.') }}</div>
+                                                    <div class="text-sm text-gray-500">
+                                                        Dikonfirmasi pada:
+                                                        {{-- Cek apakah tanggal konfirmasi ada sebelum memformatnya --}}
+                                                        @if ($order->payment_confirmed_at)
+                                                            {{ $order->payment_confirmed_at->format('d M Y, H:i') }}
+                                                        @else
+                                                            <span class="text-gray-400 italic">Belum dikonfirmasi</span>
+                                                        @endif
+                                                    </div>
+                                                </td>
+
                                                 <td class="px-6 py-4 text-center">
                                                     <div class="flex justify-center space-x-2">
                                                         <form action="{{ route('issuer.orders.approvePayment', $order->id) }}" method="POST" onsubmit="return confirm('Anda yakin ingin menyetujui pembayaran ini?');">
@@ -135,6 +145,7 @@
     </div>
     
     <script>
+        // ... (Tidak ada perubahan pada Javascript) ...
         document.addEventListener('DOMContentLoaded', function() {
             const modal = document.getElementById('reviewModal');
             const modalCard = document.getElementById('modalCard');

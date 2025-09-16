@@ -47,7 +47,6 @@
                     @endif
 
                     @if($powerPlant)
-                    <!-- Power Plant Info Card -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         <div class="md:col-span-2 bg-white p-6 rounded-2xl shadow-lg">
                             <div class="flex justify-between items-start">
@@ -66,18 +65,16 @@
                         <div class="bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex flex-col justify-center items-center p-6 rounded-2xl shadow-lg">
                              <h3 class="text-lg font-bold mb-4">Aksi Cepat</h3>
                              <button id="reportButton" class="w-full bg-white/30 hover:bg-white/40 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105">
-                                <i class="fas fa-file-invoice-dollar mr-2"></i>Lapor Produksi
+                                 <i class="fas fa-file-invoice-dollar mr-2"></i>Lapor Produksi
                              </button>
                         </div>
                     </div>
                     @endif
 
-                    <!-- Energy Reports History -->
                     <div class="bg-white overflow-hidden shadow-xl sm:rounded-2xl">
                         <div class="p-6 md:p-8 text-gray-900">
                             <div class="flex flex-col md:flex-row justify-between items-center mb-6">
                                 <h3 class="text-2xl font-bold text-gray-800 mb-4 md:mb-0">Riwayat Laporan Produksi</h3>
-                                <!-- Filter & Sort Form -->
                                 <form method="GET" action="{{ route('generator.dashboard') }}" class="flex items-center space-x-4">
                                     <select name="status" class="rounded-md border-gray-300 shadow-sm focus:ring-purple-500 focus:border-purple-500">
                                         <option value="all" {{ ($filters['status'] ?? 'all') == 'all' ? 'selected' : '' }}>Semua Status</option>
@@ -116,7 +113,7 @@
                                                         <div class="text-sm font-medium text-gray-900">Laporan #{{ $report->id }}</div>
                                                         <div class="text-sm text-gray-500">{{ $report->reporting_period_start->format('M Y') }}</div>
                                                     </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">{{ number_format($report->amount_mwh, 2, ',', '.') }}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">{{ number_format($report->energy_generated_mwh, 2, ',', '.') }}</td>
                                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
                                                         @if($report->status == 'approved')
                                                             <span class="px-3 py-1 inline-flex leading-5 font-semibold rounded-full bg-green-100 text-green-800">Disetujui</span>
@@ -142,7 +139,6 @@
         </main>
     </div>
 
-    <!-- Modal "Lapor Produksi Energi" -->
     @if($powerPlant)
     <div id="reportModal" class="fixed inset-0 z-50 flex items-center justify-center modal-overlay hidden opacity-0">
         <div id="reportModalCard" class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl m-4 transform transition-all duration-300 scale-95 opacity-0">
@@ -153,7 +149,12 @@
                 <div class="p-8 space-y-6">
                     <div><label for="reporting_period_start" class="block text-sm font-medium">Periode Mulai</label><input type="date" name="reporting_period_start" class="mt-1 block w-full rounded-md" required></div>
                     <div><label for="reporting_period_end" class="block text-sm font-medium">Periode Selesai</label><input type="date" name="reporting_period_end" class="mt-1 block w-full rounded-md" required></div>
-                    <div><label for="amount_mwh" class="block text-sm font-medium">Jumlah Energi (MWh)</label><input type="number" step="0.01" name="amount_mwh" class="mt-1 block w-full rounded-md" required></div>
+                    
+                    <div>
+                        <label for="amount_mwh" class="block text-sm font-medium">Jumlah Energi (MWh)</label>
+                        <input type="number" step="0.01" name="amount_mwh" id="amount_mwh" class="mt-1 block w-full rounded-md" required>
+                    </div>
+                    
                     <div><label for="supporting_document" class="block text-sm font-medium">Dokumen Pendukung (PDF, Opsional)</label><input type="file" name="supporting_document" class="mt-1 block w-full text-sm"></div>
                 </div>
                 <div class="px-8 py-4 bg-gray-50 border-t flex justify-end"><button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-lg">Ajukan Laporan</button></div>
@@ -162,7 +163,6 @@
     </div>
     @endif
     
-    <!-- Modal "Edit Info Pembangkit" -->
     @if($powerPlant)
     <div id="editModal" class="fixed inset-0 z-50 flex items-center justify-center modal-overlay hidden opacity-0">
         <div id="editModalCard" class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl m-4 transform transition-all duration-300 scale-95 opacity-0">
