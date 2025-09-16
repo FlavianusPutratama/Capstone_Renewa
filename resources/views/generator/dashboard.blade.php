@@ -70,21 +70,59 @@
                         </div>
                     </div>
                     @endif
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-white p-6 rounded-2xl shadow-lg">
+                            <div class="flex items-center">
+                                <div class="bg-purple-100 text-purple-600 p-3 rounded-full mr-4">
+                                    <i class="fas fa-bolt fa-fw"></i>
+                                </div>
+                                <div>
+                                    <dt class="text-sm text-gray-500">Total Energi Dilaporkan</dt>
+                                    <dd class="text-2xl font-bold text-gray-800">{{ number_format($totalEnergyGenerated, 2, ',', '.') }} MWh</dd>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-lg">
+                            <div class="flex items-center">
+                                <div class="bg-green-100 text-green-600 p-3 rounded-full mr-4">
+                                    <i class="fas fa-certificate fa-fw"></i>
+                                </div>
+                                <div>
+                                    <dt class="text-sm text-gray-500">Total Sertifikat Terbit</dt>
+                                    <dd class="text-2xl font-bold text-gray-800">{{ number_format($totalCertificatesIssued, 2, ',', '.') }} MWh</dd>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-lg">
+                            <div class="flex items-center">
+                                <div class="bg-yellow-100 text-yellow-600 p-3 rounded-full mr-4">
+                                    <i class="fas fa-hourglass-half fa-fw"></i>
+                                </div>
+                                <div>
+                                    <dt class="text-sm text-gray-500">Laporan Pending</dt>
+                                    <dd class="text-2xl font-bold text-gray-800">{{ $totalReportsPending }}</dd>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
 
                     <div class="bg-white overflow-hidden shadow-xl sm:rounded-2xl">
                         <div class="p-6 md:p-8 text-gray-900">
                             <div class="flex flex-col md:flex-row justify-between items-center mb-6">
                                 <h3 class="text-2xl font-bold text-gray-800 mb-4 md:mb-0">Riwayat Laporan Produksi</h3>
                                 <form method="GET" action="{{ route('generator.dashboard') }}" class="flex items-center space-x-4">
+                                    
                                     <select name="status" class="rounded-md border-gray-300 shadow-sm focus:ring-purple-500 focus:border-purple-500">
-                                        <option value="all" {{ ($filters['status'] ?? 'all') == 'all' ? 'selected' : '' }}>Semua Status</option>
-                                        <option value="pending_verification" {{ ($filters['status'] ?? '') == 'pending_verification' ? 'selected' : '' }}>Pending</option>
-                                        <option value="approved" {{ ($filters['status'] ?? '') == 'approved' ? 'selected' : '' }}>Disetujui</option>
-                                        <option value="rejected" {{ ($filters['status'] ?? '') == 'rejected' ? 'selected' : '' }}>Ditolak</option>
+                                        <option value="all" {{ request('status', 'all') == 'all' ? 'selected' : '' }}>Semua Status</option>
+                                        <option value="pending_verification" {{ request('status') == 'pending_verification' ? 'selected' : '' }}>Pending</option>
+                                        <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Disetujui</option>
+                                        <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Ditolak</option>
                                     </select>
                                     <select name="sort_by" class="rounded-md border-gray-300 shadow-sm focus:ring-purple-500 focus:border-purple-500">
-                                        <option value="newest" {{ ($filters['sort_by'] ?? 'newest') == 'newest' ? 'selected' : '' }}>Terbaru</option>
-                                        <option value="oldest" {{ ($filters['sort_by'] ?? '') == 'oldest' ? 'selected' : '' }}>Terlama</option>
+                                        <option value="newest" {{ request('sort_by', 'newest') == 'newest' ? 'selected' : '' }}>Terbaru</option>
+                                        <option value="oldest" {{ request('sort_by') == 'oldest' ? 'selected' : '' }}>Terlama</option>
                                     </select>
                                     <button type="submit" class="px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700">Terapkan</button>
                                 </form>
@@ -111,9 +149,9 @@
                                                 <tr class="hover:bg-purple-50/50 transition duration-300">
                                                     <td class="px-6 py-4 whitespace-nowrap">
                                                         <div class="text-sm font-medium text-gray-900">Laporan #{{ $report->id }}</div>
-                                                        <div class="text-sm text-gray-500">{{ $report->reporting_period_start->format('M Y') }}</div>
+                                                        <div class="text-sm text-gray-500">{{ \Carbon\Carbon::parse($report->reporting_period_start)->format('M Y') }}</div>
                                                     </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">{{ number_format($report->energy_generated_mwh, 2, ',', '.') }}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">{{ number_format($report->amount_mwh, 2, ',', '.') }}</td>
                                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
                                                         @if($report->status == 'approved')
                                                             <span class="px-3 py-1 inline-flex leading-5 font-semibold rounded-full bg-green-100 text-green-800">Disetujui</span>

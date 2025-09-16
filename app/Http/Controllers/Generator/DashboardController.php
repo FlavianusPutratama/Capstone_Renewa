@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Generator;
 
 use App\Http\Controllers\Controller;
 use App\Models\EnergyReport;
+use App\Models\Certificate;
+use App\Models\PowerPlant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,21 +16,20 @@ class DashboardController extends Controller
      */
     public function index(Request $request)
     {
-        $user = Auth::user()->load('powerPlants');
-        $powerPlant = $user->powerPlants->first();
+        $user = Auth::user();
 
-        // Ambil ID dari semua pembangkit milik user
-        $powerPlantIds = $user->powerPlants->pluck('id');
+        // 1. Ambil data dasar yang diperlukan
+        $powerPlants = PowerPlant::where('user_id', $user->id)->get();
+        $powerPlantIds = $powerPlants->pluck('id');
+        $powerPlant = $powerPlants->first();
 
-        // Mulai query untuk mengambil laporan
+        // 2. Siapkan query untuk mengambil laporan energi
         $query = EnergyReport::whereIn('power_plant_id', $powerPlantIds);
 
-        // Terapkan filter status jika ada
+        // (Opsional) Terapkan filter dan sorting pada query
         if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
         }
-
-        // Terapkan sorting
         $sortBy = $request->input('sort_by', 'newest');
         if ($sortBy === 'oldest') {
             $query->orderBy('created_at', 'asc');
@@ -36,14 +37,24 @@ class DashboardController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        // Ambil data laporan setelah filter dan sort
+        // --- INI BAGIAN PENTING ---
+        // 3. JALANKAN QUERY dan ambil datanya dari database
         $energyReports = $query->get();
 
-        return view('generator.dashboard', [
-            'user' => $user,
-            'powerPlant' => $powerPlant,
-            'energyReports' => $energyReports,
-            'filters' => $request->only(['status', 'sort_by']), // Kirim filter ke view
-        ]);
+        // 4. SETELAH DATA DIAMBIL, baru lakukan perhitungan
+        $totalEnergyGenerated = $energyReports->sum('amount_mwh');
+        $totalCertificatesIssued = Certificate::whereIn('energy_report_id', $energyReports->pluck('id'))->sum('amount_mwh');
+        $totalReportsPending = $energyReports->where('status', 'pending_verification')->count();
+
+        // 5. Kirim semua variabel yang sudah benar ke view
+        return view('generator.dashboard', compact(
+            'user',
+            'powerPlants',
+            'powerPlant',
+            'energyReports',
+            'totalEnergyGenerated',
+            'totalCertificatesIssued',
+            'totalReportsPending'
+        ));
     }
 }
