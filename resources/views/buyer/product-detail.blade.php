@@ -22,7 +22,6 @@
 
             <div class="bg-white rounded-2xl shadow-xl overflow-hidden max-w-4xl mx-auto">
                 <div class="grid grid-cols-1 md:grid-cols-2">
-                    <!-- Kolom Gambar -->
                     <div class="w-full h-64 md:h-full bg-gray-200">
                         @if($powerPlant->image_url)
                             <img src="{{ $powerPlant->image_url }}" alt="Foto {{ $powerPlant->name }}" class="w-full h-full object-cover">
@@ -33,7 +32,6 @@
                         @endif
                     </div>
 
-                    <!-- Kolom Detail & Form Pembelian -->
                     <div class="p-8 flex flex-col justify-between">
                         <div>
                             <div class="flex justify-between items-start mb-2">
@@ -59,11 +57,11 @@
                                 @csrf
                                 <input type="hidden" name="power_plant_id" value="{{ $powerPlant->id }}">
                                 <input type="hidden" name="min_purchase" value="{{ $minPurchase }}">
+                                {{-- INI PERUBAHANNYA --}}
                                 <input type="hidden" name="category" value="{{ $category }}">
                                 
                                 <div class="mb-4">
                                     <label for="quantity" class="block text-sm font-medium text-gray-700">Jumlah Pembelian (MWh)</label>
-                                    {{-- Atur 'min' berdasarkan $minPurchase yang aman dari controller --}}
                                     <input type="number" name="quantity" id="quantity" step="1" min="{{ $minPurchase }}" max="{{ floor($availableMwh) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Min. {{ $minPurchase }} MWh" required>
                                     @if($minPurchase > 0)
                                         <p class="mt-1 text-xs text-gray-500">Minimal pembelian untuk kategori ini adalah {{ $minPurchase }} MWh.</p>
@@ -90,7 +88,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             const quantityInput = document.getElementById('quantity');
             const totalPriceDisplay = document.getElementById('total-price');
-            const pricePerMwh = 35000; // Harga per MWh (bisa diganti nanti)
+            const pricePerMwh = 35000;
 
             function calculateTotal() {
                 const quantity = parseFloat(quantityInput.value) || 0;

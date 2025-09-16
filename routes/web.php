@@ -49,7 +49,7 @@ Route::middleware('auth')->group(function () {
 // ===== PROTECTED BUYER ROUTES =====
 Route::middleware(['auth', 'App\Http\Middleware\CheckRole:buyer'])->prefix('buyer')->name('buyer.')->group(function () {
     Route::get('/dashboard', function () {
-        return view('dashboard'); // Pastikan ini view dashboard buyer
+        return view('/welcome'); // Pastikan ini view dashboard buyer
     })->name('dashboard');
     
     Route::get('/categoryselect', function () {
@@ -69,6 +69,12 @@ Route::middleware(['auth', 'App\Http\Middleware\CheckRole:buyer'])->prefix('buye
     Route::post('/profile', [BuyerAuthController::class, 'updateProfile'])->name('profile.update');
     Route::get('/profile/edit', [BuyerAuthController::class, 'showProfile'])->name('profile.edit');
     Route::post('/profile/password', [BuyerAuthController::class, 'updatePassword'])->name('profile.updatePassword');
+
+    Route::get('/checkout/company-details', [CheckoutController::class, 'createCompanyForm'])->name('checkout.company.create');
+    Route::post('/checkout/company-details', [CheckoutController::class, 'storeCompanyForm'])->name('checkout.company.store');
+
+    Route::post('/checkout/select-category/{certificate}', [App\Http\Controllers\Buyer\CheckoutController::class, 'storeCategoryAndProceed'])->name('checkout.storeCategoryAndProceed');
+    Route::get('/checkout/summary', [App\Http\Controllers\Buyer\CheckoutController::class, 'summary'])->name('checkout.summary');
 });
 
 

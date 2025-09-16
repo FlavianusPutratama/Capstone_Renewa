@@ -75,11 +75,14 @@ class User extends Authenticatable
         return $this->hasMany(Certificate::class, 'owner_id');
     }
 
-    /**
-     * Mendefinisikan relasi bahwa user ini bisa "memiliki banyak" pesanan.
-     */
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class, 'buyer_id');
     }
+
+    public function company()
+    {
+        return $this->hasOne(Company::class);
+    }
+
 }
