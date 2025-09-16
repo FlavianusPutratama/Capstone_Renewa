@@ -20,6 +20,7 @@ class Order extends Model
         'total_price',
         'virtual_account_number',
         'status',
+        'category',
     ];
 
     /**

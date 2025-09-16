@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Buyer;
 use App\Http\Controllers\Controller;
 use App\Models\PowerPlant;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class MarketplaceController extends Controller
 {
@@ -19,43 +18,48 @@ class MarketplaceController extends Controller
             return redirect()->route('buyer.categoryselect')->with('info', 'Silakan pilih kategori pembelian terlebih dahulu.');
         }
 
-        // Validasi input dari URL, hanya untuk kategori
+        // Validasi input dari URL
         $validated = $request->validate([
             'category' => 'required|string|in:Retail,Signature,Enterprise',
         ]);
 
         $category = $validated['category'];
 
-        // Tentukan minimal pembelian yang BENAR di sisi server berdasarkan kategori.
+        // Tentukan minimal pembelian di sisi server
         $minPurchase = match ($category) {
             'Retail' => 10,
             'Enterprise' => 200,
-            default => 0, // Untuk 'Signature' atau kategori lain di masa depan
+            default => 0,
         };
 
-        // Query utama: Ambil data Pembangkit
-        $query = PowerPlant::query();
+        // Query utama untuk mengambil data Pembangkit
+        $query = PowerPlant::query()
+            ->with('user') // Eager load relasi user
+            ->withSum(['certificates' => function ($query) {
+                // Pastikan hanya menjumlahkan sertifikat yang tersedia
+                $query->where('certificates.status', 'available_for_sale');
+            }], 'amount_mwh')
+            // Pastikan hanya menampilkan pembangkit yang punya sertifikat
+            ->whereHas('certificates', function ($query) {
+                $query->where('certificates.status', 'available_for_sale');
+            });
 
-        // Tambahkan query untuk menjumlahkan MWh dari sertifikat yang TERSEDIA
-        // dengan menyebutkan nama tabel secara eksplisit pada 'status'.
-        $query->withSum(['certificates' => function ($query) {
-            $query->where('certificates.status', 'available_for_sale');
-        }], 'amount_mwh')
-        ->has('certificates');
-
-        // Terapkan filter berdasarkan minimal pembelian yang sudah kita tentukan di server
+        // Filter berdasarkan total energi yang tersedia harus lebih besar dari minimal pembelian
+        // (Contoh: Jangan tampilkan pembangkit 150 MWh jika kategori Enterprise min. 200)
         $query->having('certificates_sum_amount_mwh', '>=', $minPurchase);
-        
-        // Eager load relasi owner untuk menampilkan nama generator
-        $query->with('user');
 
         // Eksekusi query
         $powerPlants = $query->get();
         
-        // Kirim data ke view
-        return view('buyer.marketplace', [
-            'powerPlants' => $powerPlants,
-            'category' => $category,
-        ]);
+        // ======================================================
+        // === PERBAIKANNYA DI SINI ===
+        // ======================================================
+        // Buat array $filters untuk dikirim ke view.
+        $filters = [
+            'category' => $category
+        ];
+
+        // Kirim 'powerPlants' dan 'filters' ke view.
+        return view('buyer.marketplace', compact('powerPlants', 'filters'));
     }
 }

@@ -14,25 +14,11 @@
     <main class="py-12 pt-24">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
 
-            {{-- ====================================================== --}}
-            {{-- === BLOK BARU UNTUK MENAMPILKAN SEMUA JENIS ERROR === --}}
-            {{-- ====================================================== --}}
             @if(session('error'))
-                <div class="mb-6 max-w-4xl mx-auto p-4 bg-red-100 border border-red-200 rounded-xl text-red-700 text-sm">
-                    {{ session('error') }}
+                <div class="mb-6 max-w-4xl mx-auto p-4 bg-red-100 border border-red-200 rounded-xl text-red-700 text-sm flex items-center">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>{{ session('error') }}
                 </div>
             @endif
-            @if ($errors->any())
-                <div class="mb-6 max-w-4xl mx-auto p-4 bg-red-100 border border-red-200 rounded-xl text-red-700 text-sm">
-                    <strong>Terdapat kesalahan:</strong>
-                    <ul class="list-disc list-inside mt-2">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-            {{-- ====================================================== --}}
 
             <div class="bg-white rounded-2xl shadow-xl overflow-hidden max-w-4xl mx-auto">
                 <div class="grid grid-cols-1 md:grid-cols-2">
@@ -48,6 +34,14 @@
 
                     <div class="p-8 flex flex-col justify-between">
                         <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    @if($powerPlant->energy_type == 'PLTA') bg-blue-100 text-blue-800
+                                    @elseif($powerPlant->energy_type == 'PLTP') bg-red-100 text-red-800
+                                    @else bg-green-100 text-green-800 @endif">
+                                    {{ $powerPlant->energy_type }}
+                                </span>
+                            </div>
                             <h1 class="text-3xl font-bold text-gray-900">{{ $powerPlant->name }}</h1>
                             <p class="text-sm text-gray-500 mt-1">Dihasilkan oleh: <span class="font-medium">{{ $powerPlant->user->name }}</span></p>
 
@@ -67,6 +61,9 @@
                                 <div class="mb-4">
                                     <label for="quantity" class="block text-sm font-medium text-gray-700">Jumlah Pembelian (MWh)</label>
                                     <input type="number" name="quantity" id="quantity" step="1" min="{{ $minPurchase }}" max="{{ floor($availableMwh) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Min. {{ $minPurchase }} MWh" required>
+                                    @if($minPurchase > 0)
+                                        <p class="mt-1 text-xs text-gray-500">Minimal pembelian untuk kategori ini adalah {{ $minPurchase }} MWh.</p>
+                                    @endif
                                 </div>
                                 
                                 <div class="p-4 bg-gray-50 rounded-lg flex justify-between items-center">
@@ -98,6 +95,7 @@
             }
             
             calculateTotal();
+
             quantityInput.addEventListener('input', calculateTotal);
         });
     </script>

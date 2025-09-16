@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marketplace - {{ $category }} - Renewa</title>
+    {{-- Kode ini menggunakan $filters['category'], bukan $data --}}
+    <title>Marketplace - {{ $filters['category'] }} - Renewa</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -15,7 +16,8 @@
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <header class="text-center mb-12">
                 <h1 class="text-4xl font-bold text-gray-800">Temukan Solusi Energi Terbarukan</h1>
-                <p class="text-lg text-gray-600 mt-2">Menampilkan pembangkit untuk kategori: <span class="font-semibold text-green-600">{{ $category }}</span></p>
+                 {{-- Kode ini menggunakan $filters['category'], bukan $data --}}
+                <p class="text-lg text-gray-600 mt-2">Menampilkan pembangkit untuk kategori: <span class="font-semibold text-green-600">{{ $filters['category'] }}</span></p>
             </header>
 
             @if($powerPlants->isEmpty())
@@ -27,12 +29,11 @@
                 </div>
             @else
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {{-- Kode ini menggunakan $powerPlants, bukan $data --}}
                     @foreach ($powerPlants as $powerPlant)
-                        {{-- ===== PERUBAHAN DI SINI: MEMBUNGKUS CARD DENGAN <a> DAN MENAMBAHKAN PARAMETER ===== --}}
                         <a href="{{ route('buyer.marketplace.show', [
                             'powerPlant' => $powerPlant->id, 
-                            'category' => request()->query('category'), 
-                            'min_purchase' => request()->query('min_purchase')
+                            'category' => $filters['category'],
                         ]) }}" class="group block bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transform transition-transform hover:-translate-y-2">
                             <div class="h-48 w-full">
                                 @if($powerPlant->image_url)
@@ -53,14 +54,13 @@
                                     <p class="font-bold text-green-600 text-lg">{{ number_format($powerPlant->certificates_sum_amount_mwh, 2, ',', '.') }} MWh</p>
                                 </div>
                                 <div class="mt-4 flex justify-between items-center">
-                                     <p class="text-xl font-bold text-gray-800">Rp35.000 <span class="text-sm font-normal text-gray-500">/ MWh</span></p>
-                                     <span class="bg-green-500 text-white font-bold py-2 px-6 rounded-lg transition-all group-hover:bg-green-600">
-                                        Lihat Detail
-                                     </span>
+                                      <p class="text-xl font-bold text-gray-800">Rp35.000 <span class="text-sm font-normal text-gray-500">/ MWh</span></p>
+                                      <span class="bg-green-500 text-white font-bold py-2 px-6 rounded-lg transition-all group-hover:bg-green-600">
+                                          Lihat Detail
+                                      </span>
                                 </div>
                             </div>
                         </a>
-                        {{-- ================================================================================= --}}
                     @endforeach
                 </div>
             @endif

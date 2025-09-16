@@ -34,6 +34,7 @@
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">ID Pesanan</th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Dibeli Atas Nama</th>
                                     <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Tanggal</th>
                                     <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Total Harga</th>
                                     <th class="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Status</th>
@@ -47,6 +48,16 @@
                                             <div class="text-sm font-medium text-gray-900">#{{ $order->order_uid }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">
+                                                {{-- PERUBAHAN DI SINI --}}
+                                                @if($order->category === 'Enterprise' && $order->buyer->company)
+                                                    <span class="font-semibold">{{ $order->buyer->company->name }}</span>
+                                                @else
+                                                    {{ $order->buyer->name }} (Pribadi)
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm text-gray-900">{{ $order->created_at->format('d M Y, H:i') }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
@@ -56,9 +67,9 @@
                                             @if($order->status == 'completed')
                                                 <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Selesai</span>
                                             @elseif($order->status == 'awaiting_confirmation')
-                                                 <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Menunggu Konfirmasi</span>
+                                                  <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Menunggu Konfirmasi</span>
                                             @else
-                                                 <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Menunggu Pembayaran</span>
+                                                  <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Menunggu Pembayaran</span>
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">

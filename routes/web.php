@@ -56,8 +56,11 @@ Route::middleware(['auth', 'App\Http\Middleware\CheckRole:buyer'])->prefix('buye
         return view('buyer.categoryselect');
     })->name('categoryselect');
 
-    Route::match(['get', 'post'], '/marketplace', [MarketplaceController::class, 'index'])->name('marketplace');
-    Route::get('/marketplace/{powerPlant}', [ProductDetailController::class, 'show'])->name('marketplace.show');
+    // Route untuk menampilkan daftar produk di marketplace
+    Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace');
+
+    // Route untuk menampilkan halaman detail SATU produk (URL diubah agar tidak bentrok)
+    Route::get('/product/{powerPlant}', [ProductDetailController::class, 'show'])->name('marketplace.show');
 
     Route::get('/orders', [CheckoutController::class, 'index'])->name('orders.index');
 
