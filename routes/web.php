@@ -59,10 +59,11 @@ Route::middleware(['auth', 'App\Http\Middleware\CheckRole:buyer'])->prefix('buye
     Route::match(['get', 'post'], '/marketplace', [MarketplaceController::class, 'index'])->name('marketplace');
     Route::get('/marketplace/{powerPlant}', [ProductDetailController::class, 'show'])->name('marketplace.show');
 
+    Route::get('/orders', [CheckoutController::class, 'index'])->name('orders.index');
+
     Route::get('/orders/{order}', [CheckoutController::class, 'showOrder'])->name('orders.show');
     Route::post('/checkout', [CheckoutController::class, 'processOrder'])->name('checkout.process');
     Route::post('/orders/{order}/confirm', [CheckoutController::class, 'confirmPayment'])->name('orders.confirm');
-    // Route::post('/checkout', [CheckoutController::class, 'processOrder'])->name('buyer.checkout.process');
 
     Route::get('/profile', [BuyerAuthController::class, 'showProfile'])->name('profile.show');
     Route::post('/profile', [BuyerAuthController::class, 'updateProfile'])->name('profile.update');

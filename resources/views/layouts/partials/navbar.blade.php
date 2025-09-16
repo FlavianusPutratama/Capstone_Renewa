@@ -31,6 +31,10 @@
                         <a href="{{ route('buyer.marketplace') }}" class="{{ request()->routeIs('buyer.marketplace') ? 'text-green-600 font-semibold border-b-2 border-green-600' : 'text-gray-700 hover:text-green-600 font-medium' }} transition-all duration-300 hover:scale-105">
                             <i class="fas fa-shopping-cart mr-1"></i>Beli REC
                         </a>
+
+                        <a href="{{ route('buyer.orders.index') }}" class="{{ request()->routeIs('buyer.orders.index') ? 'text-green-600 font-semibold border-b-2 border-green-600' : 'text-gray-700 hover:text-green-600 font-medium' }} transition-all duration-300 hover:scale-105">
+                            <i class="fas fa-receipt mr-1"></i>REC Saya
+                        </a>
                     @endif
                 @endauth
             </div>
@@ -86,6 +90,9 @@
              @auth
                 @if(Auth::user()->role === 'buyer')
                      <a href="{{ route('buyer.marketplace') }}" class="{{ request()->routeIs('buyer.marketplace') ? 'text-green-600 font-semibold' : 'text-gray-700 hover:text-green-600 font-medium' }}">Beli REC</a>
+                     {{-- INI KODE BARUNYA --}}
+                     <a href="{{ route('buyer.orders.index') }}" class="{{ request()->routeIs('buyer.orders.index') ? 'text-green-600 font-semibold' : 'text-gray-700 hover:text-green-600 font-medium' }}">Lacak Pesanan</a>
+                     {{-- AKHIR DARI KODE BARU --}}
                 @endif
              @endauth
         </div>

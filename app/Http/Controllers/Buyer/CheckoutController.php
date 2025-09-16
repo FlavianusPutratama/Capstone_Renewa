@@ -13,6 +13,20 @@ use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
 {
+
+    /**
+     * Menampilkan riwayat pesanan milik buyer.
+     */
+    public function index()
+    {
+        $orders = Order::where('buyer_id', Auth::id())
+                       ->with('certificates.energyReport.powerPlant') // Eager load untuk detail
+                       ->orderBy('created_at', 'desc')
+                       ->get();
+
+        return view('buyer.orders-index', compact('orders'));
+    }
+
     /**
      * Memproses pesanan dari halaman detail produk.
      */
