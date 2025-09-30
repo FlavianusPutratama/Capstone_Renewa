@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Renewa - Solusi Energi Terbarukan</title>
     <meta name="description" content="Platform Renewable Energy Certificate untuk mendukung energi bersih di Indonesia">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -113,6 +114,32 @@
                 <div class="flex justify-center items-center hover-lift" data-aos="zoom-in" data-aos-delay="600">
                     <img src="{{ asset('images/Mandiri Logo.png') }}" alt="Client 6" class="h-10">
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!--REC Tracking Section -->
+    <section id="track-section" class="py-16 bg-gray-50 w-full" data-aos="fade-up">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Lacak Transparansi REC Anda</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto mb-8">Masukkan Order ID unik Anda untuk melihat detail sertifikat energi terbarukan yang telah dibeli oleh perusahaan Anda.</p>
+            
+            {{-- Form Pelacakan --}}
+            <form id="rec-tracking-form" class="max-w-xl mx-auto flex items-center border rounded-full p-2 bg-white shadow-md">
+                {{-- Kita tidak perlu @csrf di sini karena Fetch API akan mengambilnya dari meta tag --}}
+                <div class="w-full">
+                    <input type="text" id="order_id_input" name="order_id" placeholder="Contoh: REC-TRX-ABC12345" class="w-full py-3 px-6 text-gray-700 leading-tight focus:outline-none border-none bg-transparent" required>
+                </div>
+                <div class="flex-shrink-0">
+                    <button type="submit" id="tracking-submit-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full transition-colors duration-300">
+                        <i class="fas fa-search mr-2"></i>Lacak
+                    </button>
+                </div>
+            </form>
+
+            {{-- Container untuk menampilkan pesan error dari AJAX --}}
+            <div id="tracking-error-container" class="mt-4 text-red-600 bg-red-100 p-3 rounded-lg max-w-xl mx-auto hidden">
+                {{-- Pesan error akan dimasukkan di sini oleh JavaScript --}}
             </div>
         </div>
     </section>
@@ -458,7 +485,84 @@
            scrollProgress.style.width = scrollPercent + '%';
        });
    </script>
+
+   <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('rec-tracking-form');
+        // Jika form tidak ada di halaman ini, hentikan eksekusi script
+        if (!form) return;
+
+        const errorContainer = document.getElementById('tracking-error-container');
+        const submitButton = document.getElementById('tracking-submit-btn');
+        const orderIdInput = document.getElementById('order_id_input');
+        // Mengambil CSRF token dari meta tag (praktik standar Laravel)
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        form.addEventListener('submit', function (event) {
+            // 1. Mencegah form dari submit tradisional (agar tidak refresh)
+            event.preventDefault();
+
+            // Reset tampilan error dan state button
+            errorContainer.classList.add('hidden');
+            errorContainer.textContent = '';
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Mencari...';
+
+            // 2. Mengambil data dari form
+            const orderId = orderIdInput.value;
+
+            // 3. Mengirim request ke API endpoint menggunakan Fetch API
+            fetch('{{ route("rec.track.ajax") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken, // Menggunakan token dari meta tag
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    order_id: orderId
+                })
+            })
+            .then(response => {
+                // Mengubah response menjadi JSON, baik itu sukses atau error
+                return response.json().then(data => {
+                    // Menambahkan status 'ok' ke data untuk penanganan lebih lanjut
+                    return { ok: response.ok, data: data };
+                });
+            })
+            .then(result => {
+                if (result.ok) {
+                    // 4. Menangani response SUKSES (status 2xx)
+                    if (result.data.success && result.data.redirect_url) {
+                        window.location.href = result.data.redirect_url;
+                    }
+                } else {
+                    // 5. Menangani response GAGAL (status 4xx atau 5xx)
+                    throw result.data; // Melempar data error (JSON) ke blok catch
+                }
+            })
+            .catch(error => {
+                // Menampilkan pesan error dari server di container
+                // 'error.message' akan berisi pesan dari response JSON controller
+                errorContainer.textContent = error.message || 'Terjadi kesalahan. Silakan coba lagi.';
+                errorContainer.classList.remove('hidden');
+            })
+            .finally(() => {
+                // Mengembalikan button ke state semula setelah proses selesai
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="fas fa-search mr-2"></i>Lacak';
+            });
+        });
+
+        // Sembunyikan pesan error jika pengguna mulai mengetik lagi
+        orderIdInput.addEventListener('input', function() {
+            if (!errorContainer.classList.contains('hidden')) {
+                errorContainer.classList.add('hidden');
+            }
+        });
+    });
+    </script>
    
-   <script src="{{ asset('js/app.js') }}"></script>
+    <script src="{{ asset('js/app.js') }}"></script>
 </body>
 </html>

@@ -10,6 +10,7 @@ use App\Http\Controllers\Buyer\ProductDetailController;
 use App\Http\Controllers\Buyer\CheckoutController;
 use App\Http\Controllers\Generator\PowerPlantController; 
 use App\Http\Controllers\Admin\VerificationController;
+use App\Http\Controllers\RecTrackingController;
 
 
 // ===== PUBLIC ROUTES =====
@@ -21,7 +22,11 @@ Route::get('/generatormap', function () {
     return view('generatormap');
 })->name('generatormap');
 
-// ... Rute publik lainnya jika ada ...
+// ===== REC TRACKING ROUTES =====
+Route::post('/track-rec', [RecTrackingController::class, 'track'])->name('rec.track');
+Route::get('/track-rec/{order:order_uid}', [RecTrackingController::class, 'show'])->name('rec.show');
+Route::post('/api/track-rec', [RecTrackingController::class, 'ajaxTrack'])->name('rec.track.ajax');
+
 
 
 // ===== AUTHENTICATION & REGISTRATION ROUTES =====
