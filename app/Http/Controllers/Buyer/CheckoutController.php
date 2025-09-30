@@ -182,4 +182,29 @@ class CheckoutController extends Controller
 
         return redirect()->route('buyer.orders.show', $order->id)->with('info', 'Pesanan ini sudah dikonfirmasi sebelumnya.');
     }
+
+    /**
+     * Menampilkan halaman detail sertifikat untuk pesanan yang sudah selesai.
+     */
+    public function showCertificate(Order $order)
+    {
+        // 1. Otorisasi: Pastikan order ini milik user yang sedang login.
+        if ($order->buyer_id !== Auth::id()) {
+            abort(403, 'Akses ditolak.');
+        }
+
+        // 2. Validasi Status: Pastikan hanya order yang sudah selesai yang bisa dilihat sertifikatnya.
+        if ($order->status !== 'completed') {
+            return redirect()->route('buyer.orders.show', $order->id)->with('error', 'Sertifikat hanya dapat dilihat untuk pesanan yang telah selesai.');
+        }
+
+        // 3. Eager Load relasi yang dibutuhkan untuk tampilan sertifikat.
+        $order->load(['buyer.company', 'certificates.energyReport.powerPlant']);
+
+        // 4. Hitung total MWh, sama seperti di controller tracking publik.
+        $totalMwh = $order->certificates->sum('amount_mwh');
+
+        // 5. Tampilkan view sertifikat dengan data yang sudah disiapkan.
+        return view('buyer.certificate-detail', compact('order', 'totalMwh'));
+    }
 }

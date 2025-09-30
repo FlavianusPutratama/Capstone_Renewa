@@ -25,6 +25,12 @@
                         <i class="fas fa-info-circle mr-2"></i>{{ session('info') }}
                     </div>
                 @endif
+                @if(session('error'))
+                    <div class="mb-6 p-4 bg-red-100 border border-red-200 rounded-xl text-red-700 text-sm flex items-center">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>{{ session('error') }}
+                    </div>
+                @endif
+
 
                 <div class="bg-white rounded-2xl shadow-xl p-8">
                     <div class="text-center mb-8 border-b pb-6">
@@ -87,8 +93,11 @@
                                 <p class="text-blue-700">Terima kasih atas konfirmasi Anda. Pesanan akan segera diverifikasi oleh tim kami.</p>
                              </div>
                         @else
-                             <div class="text-center p-4 bg-green-50 rounded-lg">
+                             <div class="text-center p-4 bg-green-50 rounded-lg space-y-3">
                                 <p class="text-green-700">Pesanan ini telah selesai. Terima kasih telah mendukung energi terbarukan!</p>
+                                <a href="{{ route('buyer.orders.certificate', $order->id) }}" class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition-all">
+                                    <i class="fas fa-certificate mr-2"></i>Lihat Sertifikat
+                                </a>
                              </div>
                         @endif
                     </div>

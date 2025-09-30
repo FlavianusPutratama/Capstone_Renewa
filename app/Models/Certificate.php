@@ -36,12 +36,6 @@ class Certificate extends Model
         return $this->belongsTo(User::class, 'owner_id');
     }
 
-    /**
-     * ==================================================================
-     * INI ADALAH PERBAIKAN KUNCI DAN SATU-SATUNYA PENYEBAB MASALAH
-     * ==================================================================
-     * Relasi ini harus BelongsTo, yang artinya "Sertifikat ini DIMILIKI OLEH satu Pesanan".
-     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
