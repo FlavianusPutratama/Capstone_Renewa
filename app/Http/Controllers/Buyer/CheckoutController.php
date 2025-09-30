@@ -160,7 +160,11 @@ class CheckoutController extends Controller
         if ($order->buyer_id !== Auth::id()) {
             abort(403);
         }
-        return view('buyer.order-show', compact('order'));
+
+        // Hitung total MWh dari sertifikat yang terkait dengan pesanan ini
+        $totalMwh = $order->certificates()->sum('amount_mwh');
+
+        return view('buyer.order-show', compact('order', 'totalMwh'));
     }
 
     public function confirmPayment(Request $request, Order $order)

@@ -28,9 +28,17 @@
 
                 <div class="bg-white rounded-2xl shadow-xl p-8">
                     <div class="text-center mb-8 border-b pb-6">
-                        <i class="fas fa-file-invoice-dollar fa-3x text-green-500 mb-4"></i>
-                        <h1 class="text-3xl font-bold text-gray-800">Lanjutkan Pembayaran</h1>
-                        <p class="text-gray-500 mt-1">Selesaikan pembayaran untuk pesanan <span class="font-semibold text-gray-700">#{{ $order->order_uid }}</span>.</p>
+                        @if($order->status == 'pending_payment')
+                            <i class="fas fa-file-invoice-dollar fa-3x text-yellow-500 mb-4"></i>
+                            <h1 class="text-3xl font-bold text-gray-800">Lanjutkan Pembayaran</h1>
+                        @elseif($order->status == 'awaiting_confirmation')
+                            <i class="fas fa-hourglass-half fa-3x text-blue-500 mb-4"></i>
+                            <h1 class="text-3xl font-bold text-gray-800">Menunggu Konfirmasi</h1>
+                        @elseif($order->status == 'completed')
+                            <i class="fas fa-check-circle fa-3x text-green-500 mb-4"></i>
+                            <h1 class="text-3xl font-bold text-gray-800">Pesanan Selesai</h1>
+                        @endif
+                        <p class="text-gray-500 mt-1">Detail untuk pesanan <span class="font-semibold text-gray-700">#{{ $order->order_uid }}</span>.</p>
                     </div>
 
                     <div class="space-y-4">
@@ -40,7 +48,13 @@
                                 <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Menunggu Pembayaran</span>
                             @elseif($order->status == 'awaiting_confirmation')
                                 <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Menunggu Konfirmasi</span>
+                            @elseif($order->status == 'completed')
+                                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">Selesai</span>
                             @endif
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Jumlah REC Dibeli:</span>
+                            <span class="text-xl font-bold text-gray-900">{{ number_format($totalMwh, 2, ',', '.') }} MWh</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Total Pembayaran:</span>
@@ -48,6 +62,7 @@
                         </div>
                     </div>
                     
+                    @if($order->status == 'pending_payment')
                     <div class="mt-8 p-6 bg-gray-50 rounded-lg">
                         <h3 class="font-semibold text-lg mb-4">Instruksi Transfer (Simulasi)</h3>
                         <p class="text-sm text-gray-600 mb-2">Silakan lakukan transfer ke nomor Virtual Account di bawah ini:</p>
@@ -56,6 +71,7 @@
                             <p class="text-2xl font-mono font-bold tracking-widest text-gray-800 my-2">{{ $order->virtual_account_number }}</p>
                         </div>
                     </div>
+                    @endif
 
                     <div class="mt-8">
                         @if($order->status == 'pending_payment')
@@ -66,9 +82,13 @@
                                     <i class="fas fa-check-circle mr-2"></i>Saya Sudah Bayar
                                 </button>
                             </form>
-                        @else
+                        @elseif($order->status == 'awaiting_confirmation')
                              <div class="text-center p-4 bg-blue-50 rounded-lg">
                                 <p class="text-blue-700">Terima kasih atas konfirmasi Anda. Pesanan akan segera diverifikasi oleh tim kami.</p>
+                             </div>
+                        @else
+                             <div class="text-center p-4 bg-green-50 rounded-lg">
+                                <p class="text-green-700">Pesanan ini telah selesai. Terima kasih telah mendukung energi terbarukan!</p>
                              </div>
                         @endif
                     </div>
