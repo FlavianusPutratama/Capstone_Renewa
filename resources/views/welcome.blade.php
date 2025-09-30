@@ -85,7 +85,7 @@
                 </div>
 
                 <form 
-                    :action="searchBy === 'id' ? '{{ route("rec.track.ajax") }}' : '{{ route("rec.track.company") }}'" 
+                    action="#"
                     method="POST" 
                     id="rec-tracking-form" 
                     class="max-w-xl mx-auto flex items-center border rounded-full p-2 bg-white shadow-md">
@@ -181,14 +181,16 @@
     <script>
        document.addEventListener('DOMContentLoaded', function () {
             // Initialize AOS
-            AOS.init({
-                duration: 800,
-                easing: 'ease-in-out',
-                once: true,
-                mirror: false,
-                offset: 50,
-                delay: 0,
-            });
+            if (typeof AOS !== 'undefined') {
+                AOS.init({
+                    duration: 800,
+                    easing: 'ease-in-out',
+                    once: true,
+                    mirror: false,
+                    offset: 50,
+                    delay: 0,
+                });
+            }
 
             // Navbar scroll effect
             window.addEventListener('scroll', function() {
@@ -256,49 +258,48 @@
             const form = document.getElementById('rec-tracking-form');
             if (form) {
                 form.addEventListener('submit', function (event) {
+                    event.preventDefault(); // Mencegah submit tradisional untuk semua mode
+                    
                     const searchInput = document.getElementById('search_input');
+                    const errorContainer = document.getElementById('tracking-error-container');
+                    const submitButton = document.getElementById('tracking-submit-btn');
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                    
+                    const isSearchById = searchInput.name === 'order_id';
+                    const url = isSearchById ? '{{ route("rec.track.ajax") }}' : '{{ route("rec.track.company") }}';
+                    const body = isSearchById 
+                        ? { order_id: searchInput.value } 
+                        : { company_name: searchInput.value };
 
-                    // Hanya gunakan AJAX untuk pencarian berdasarkan ID
-                    if (searchInput.name === 'order_id') {
-                        event.preventDefault(); // Mencegah submit tradisional
-                        
-                        const errorContainer = document.getElementById('tracking-error-container');
-                        const submitButton = document.getElementById('tracking-submit-btn');
-                        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                    errorContainer.classList.add('hidden');
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Mencari...';
 
-                        errorContainer.classList.add('hidden');
-                        submitButton.disabled = true;
-                        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Mencari...';
-
-                        fetch('{{ route("rec.track.ajax") }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': csrfToken,
-                                'Accept': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                order_id: searchInput.value
-                            })
-                        })
-                        .then(response => response.json().then(data => ({ ok: response.ok, data: data })))
-                        .then(result => {
-                            if (result.ok && result.data.success) {
-                                window.location.href = result.data.redirect_url;
-                            } else {
-                                throw result.data;
-                            }
-                        })
-                        .catch(error => {
-                            errorContainer.textContent = error.message || 'Terjadi kesalahan. Silakan coba lagi.';
-                            errorContainer.classList.remove('hidden');
-                        })
-                        .finally(() => {
-                            submitButton.disabled = false;
-                            submitButton.innerHTML = '<i class="fas fa-search mr-2"></i>Lacak';
-                        });
-                    }
-                    // Jika `searchBy` adalah 'company', biarkan form submit secara normal (non-AJAX)
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(body)
+                    })
+                    .then(response => response.json().then(data => ({ ok: response.ok, data: data })))
+                    .then(result => {
+                        if (result.ok && result.data.success) {
+                            window.location.href = result.data.redirect_url;
+                        } else {
+                            throw result.data;
+                        }
+                    })
+                    .catch(error => {
+                        errorContainer.textContent = error.message || 'Terjadi kesalahan. Silakan coba lagi.';
+                        errorContainer.classList.remove('hidden');
+                    })
+                    .finally(() => {
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = '<i class="fas fa-search mr-2"></i>Lacak';
+                    });
                 });
             }
        });
