@@ -11,6 +11,7 @@ use App\Http\Controllers\Buyer\CheckoutController;
 use App\Http\Controllers\Generator\PowerPlantController; 
 use App\Http\Controllers\Admin\VerificationController;
 use App\Http\Controllers\RecTrackingController;
+use App\Http\Controllers\CompanyController;
 
 
 // ===== PUBLIC ROUTES =====
@@ -26,6 +27,10 @@ Route::get('/generatormap', function () {
 Route::post('/track-rec', [RecTrackingController::class, 'track'])->name('rec.track');
 Route::get('/track-rec/{order:order_uid}', [RecTrackingController::class, 'show'])->name('rec.show');
 Route::post('/api/track-rec', [RecTrackingController::class, 'ajaxTrack'])->name('rec.track.ajax');
+
+// Route  untuk menangani pencarian perusahaan
+Route::post('/track-rec/company', [CompanyController::class, 'search'])->name('rec.track.company');
+Route::get('/track-rec/company/{company}', [CompanyController::class, 'show'])->name('rec.show.company');
 
 
 

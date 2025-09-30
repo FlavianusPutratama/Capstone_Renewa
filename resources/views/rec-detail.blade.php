@@ -53,7 +53,6 @@
                             <p class="font-semibold text-gray-800">{{ $certificate->energyReport->powerPlant->name }}</p>
                             <div class="flex justify-between items-center text-sm text-gray-600 mt-1">
                                 <span><i class="fas fa-plug mr-2"></i>Tipe: {{ $certificate->energyReport->powerPlant->energy_type }}</span>
-                                <span><i class="fas fa-calendar-alt mr-2"></i>Periode Pembangkitan: {{ $certificate->generation_start_date->format('M Y') }}</span>
                                 <span class="font-bold text-green-700">{{ number_format($certificate->amount_mwh, 2, ',', '.') }} MWh</span>
                             </div>
                         </div>
