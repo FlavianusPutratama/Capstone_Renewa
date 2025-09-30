@@ -43,13 +43,15 @@ class AuthController extends Controller
     }
 
     /**
-     * Memperbarui informasi profil pengguna.
+     * Memperbarui informasi profil pengguna dan perusahaan.
      */
     public function updateProfile(Request $request)
     {
         $user = Auth::user();
 
+        // PERBAIKAN: Gabungkan validasi untuk data personal dan perusahaan
         $validatedData = $request->validate([
+            // Validasi Data Personal
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:15',
             'nik' => ['required', 'string', 'digits:16', Rule::unique('users')->ignore($user->id)],
@@ -58,38 +60,41 @@ class AuthController extends Controller
             'regency' => 'required|string|max:255',
             'district' => 'required|string|max:255',
             'village' => 'required|string|max:255',
+            
+            // Validasi Data Perusahaan (gunakan 'nullable' jika user boleh tidak mengisinya)
+            'company_name' => 'nullable|string|max:255',
+            'company_address' => 'nullable|string|max:255',
+            'company_phone_number' => 'nullable|string|max:20',
+            'company_nib' => 'nullable|string|max:255',
         ]);
 
-        $user->update($validatedData);
+        // Update data personal
+        $user->update([
+            'name' => $validatedData['name'],
+            'phone' => $validatedData['phone'],
+            'nik' => $validatedData['nik'],
+            'address' => $validatedData['address'],
+            'province' => $validatedData['province'],
+            'regency' => $validatedData['regency'],
+            'district' => $validatedData['district'],
+            'village' => $validatedData['village'],
+        ]);
+        
+        // PERBAIKAN: Tambahkan logika untuk update data perusahaan
+        // Hanya proses jika company_name diisi, sebagai penanda data perusahaan ada
+        if ($request->filled('company_name')) {
+            $user->company()->updateOrCreate(
+                ['user_id' => $user->id], // Kondisi pencarian
+                [ // Data untuk diupdate atau dibuat
+                    'name' => $validatedData['company_name'],
+                    'address' => $validatedData['company_address'],
+                    'phone_number' => $validatedData['company_phone_number'],
+                    'nib' => $validatedData['company_nib'],
+                ]
+            );
+        }
 
-        // Arahkan kembali ke showProfile untuk memuat ulang semua data
         return redirect()->route('buyer.profile.show')->with('success', 'Profil Anda berhasil diperbarui!');
-    }
-
-    /**
-     * Memperbarui informasi profil perusahaan.
-     */
-    public function updateCompanyProfile(Request $request)
-    {
-        $validatedData = $request->validate([
-            'company_name' => 'required|string|max:255',
-            'company_address' => 'required|string|max:255',
-            'company_phone_number' => 'required|string|max:20',
-            'company_nib' => 'required|string|max:255',
-        ]);
-
-        Auth::user()->company()->updateOrCreate(
-            ['user_id' => Auth::id()],
-            [
-                'name' => $validatedData['company_name'],
-                'address' => $validatedData['company_address'],
-                'phone_number' => $validatedData['company_phone_number'],
-                'nib' => $validatedData['company_nib'],
-            ]
-        );
-
-        // Arahkan kembali ke showProfile untuk memuat ulang semua data
-        return redirect()->route('buyer.profile.show')->with('success', 'Data perusahaan berhasil diperbarui!');
     }
 
     /**

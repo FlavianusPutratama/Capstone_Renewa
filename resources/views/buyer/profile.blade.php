@@ -66,7 +66,7 @@
                     </button>
                 </div>
                 
-                {{-- Form Profil Personal --}}
+                {{-- PERBAIKAN 1: SEMUA INPUT ADA DI DALAM SATU FORM INI --}}
                 <form id="profileForm" action="{{ route('buyer.profile.update') }}" method="POST" class="space-y-8">
                     @csrf
                     
@@ -76,7 +76,6 @@
                             <i class="fas fa-user mr-3 text-green-600"></i>Informasi Pribadi
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {{-- Fields for name, email, phone, NIK --}}
                             <div class="space-y-2">
                                 <label class="block text-sm font-semibold text-gray-700">Nama Lengkap</label>
                                 <input type="text" name="name" class="modern-input w-full px-4 py-3 rounded-xl focus:outline-none" value="{{ $user->name }}" disabled>
@@ -107,7 +106,6 @@
                                 <input type="text" name="address" class="modern-input w-full px-4 py-3 rounded-xl focus:outline-none" value="{{ $user->address }}" disabled>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {{-- Dropdowns for province, regency, district, village --}}
                                 <div class="space-y-2">
                                     <label class="block text-sm font-semibold text-gray-700">Provinsi</label>
                                     <select name="province" id="province" class="modern-select w-full px-4 py-3 rounded-xl focus:outline-none" disabled>
@@ -135,15 +133,12 @@
                             </div>
                         </div>
                     </div>
-                </form>
 
-                {{-- Informasi Perusahaan --}}
-                <div class="mt-8 pt-8 border-t border-gray-200">
-                    <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                        <i class="fas fa-building mr-3 text-green-600"></i>Informasi Perusahaan
-                    </h3>
-                    <form id="companyProfileForm" action="{{ route('buyer.profile.updateCompany') }}" method="POST" class="space-y-6">
-                        @csrf
+                    {{-- Informasi Perusahaan --}}
+                    <div class="pt-8 border-t border-gray-200">
+                        <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                            <i class="fas fa-building mr-3 text-green-600"></i>Informasi Perusahaan
+                        </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="space-y-2">
                                 <label class="block text-sm font-semibold text-gray-700">Nama Perusahaan</label>
@@ -162,8 +157,9 @@
                                 <input type="text" name="company_nib" class="modern-input w-full px-4 py-3 rounded-xl focus:outline-none" value="{{ optional($company)->nib }}" disabled>
                             </div>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
+                {{-- AKHIR DARI FORM TUNGGAL --}}
 
                 <div class="flex justify-between items-center pt-8 mt-8 border-t border-gray-200">
                     <button type="button" id="changePasswordButton" class="text-green-600 hover:text-green-700 font-medium transition-colors flex items-center">
@@ -212,25 +208,16 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            AOS.init({
-                duration: 800,
-                easing: 'ease-in-out',
-                once: true,
-                mirror: false,
-                offset: 50,
-            });
-
-            // Navbar scroll effect
+            // ... (Kode AOS & Navbar Scroll tetap sama) ...
+            AOS.init({ duration: 800, easing: 'ease-in-out', once: true, mirror: false, offset: 50 });
             window.addEventListener('scroll', function() {
                 const navbar = document.getElementById('navbar');
-                if (window.scrollY > 50) {
-                    navbar.classList.add('navbar-scrolled');
-                } else {
-                    navbar.classList.remove('navbar-scrolled');
-                }
+                if (window.scrollY > 50) navbar.classList.add('navbar-scrolled');
+                else navbar.classList.remove('navbar-scrolled');
             });
 
-            // User data for address dropdowns
+
+            // ... (Logika Dropdown Alamat tetap sama) ...
             const userData = {
                 province: '{{ $user->province }}',
                 regency: '{{ $user->regency }}',
@@ -245,7 +232,7 @@
             const districtSelect = document.getElementById('district');
             const villageSelect = document.getElementById('village');
 
-            async function fetchAndSet(selectElement, url, selectedValue, nextFetchFn, nextParam) {
+            async function fetchAndSet(selectElement, url, selectedValue, nextFetchFn) {
                 try {
                     const response = await fetch(url);
                     if (!response.ok) throw new Error('Network response was not ok');
@@ -291,30 +278,22 @@
                 await fetchAndSet(provinceSelect, 'https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json', userData.province, fetchRegencies);
             }
             
-            // Chain event listeners
             provinceSelect.addEventListener('change', function() {
-                const selectedOption = this.options[this.selectedIndex];
-                fetchRegencies(selectedOption.dataset.id);
+                fetchRegencies(this.options[this.selectedIndex].dataset.id);
             });
             regencySelect.addEventListener('change', function() {
-                const selectedOption = this.options[this.selectedIndex];
-                fetchDistricts(selectedOption.dataset.id);
+                fetchDistricts(this.options[this.selectedIndex].dataset.id);
             });
             districtSelect.addEventListener('change', function() {
-                const selectedOption = this.options[this.selectedIndex];
-                fetchVillages(selectedOption.dataset.id);
+                fetchVillages(this.options[this.selectedIndex].dataset.id);
             });
-
-            // Initial fetch
             fetchProvinces();
-
 
             // Edit/Save functionality
             const editButton = document.getElementById('editButton');
             const saveButtonContainer = document.getElementById('saveButtonContainer');
             const saveButton = document.getElementById('saveButton');
-            
-            const allInputs = document.querySelectorAll('#profileForm input, #profileForm select, #companyProfileForm input');
+            const allInputs = document.querySelectorAll('#profileForm input, #profileForm select'); // Hanya menargetkan input di dalam form utama
 
             editButton.addEventListener('click', function() {
                 isEditMode = !isEditMode;
@@ -325,9 +304,7 @@
                     this.className = 'px-4 py-2 bg-red-100 hover:bg-red-200 rounded-xl transition-colors flex items-center text-red-700';
                     saveButtonContainer.classList.remove('hidden');
                 } else {
-                    // Reset all forms
                     document.getElementById('profileForm').reset();
-                    document.getElementById('companyProfileForm').reset();
                     // Set values back to original from server
                     document.querySelector('input[name="name"]').value = '{{ $user->name }}';
                     document.querySelector('input[name="email"]').value = '{{ $user->email }}';
@@ -342,17 +319,16 @@
                     this.innerHTML = '<i class="fas fa-edit mr-2"></i>Edit Profil';
                     this.className = 'px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors flex items-center';
                     saveButtonContainer.classList.add('hidden');
-                    fetchProvinces(); // Re-fetch and set address
+                    fetchProvinces();
                 }
             });
 
+            // PERBAIKAN 2: Hanya submit satu form utama
             saveButton.addEventListener('click', function() {
                 document.getElementById('profileForm').submit();
-                document.getElementById('companyProfileForm').submit();
             });
 
-
-            // Password Modal
+            // ... (Logika Modal Password tetap sama) ...
             const passwordModal = document.getElementById('passwordModal');
             const passwordModalCard = document.getElementById('passwordModalCard');
             const changePasswordButton = document.getElementById('changePasswordButton');
@@ -384,3 +360,4 @@
     </script>
 </body>
 </html>
+
