@@ -71,6 +71,7 @@ Route::middleware(['auth', 'App\Http\Middleware\CheckRole:buyer'])->prefix('buye
     Route::get('/profile', [BuyerAuthController::class, 'showProfile'])->name('profile.show');
     Route::post('/profile', [BuyerAuthController::class, 'updateProfile'])->name('profile.update');
     Route::get('/profile/edit', [BuyerAuthController::class, 'showProfile'])->name('profile.edit');
+    Route::post('/profile/company', [BuyerAuthController::class, 'updateCompanyProfile'])->name('profile.updateCompany');
     Route::post('/profile/password', [BuyerAuthController::class, 'updatePassword'])->name('profile.updatePassword');
 
     Route::get('/checkout/company-details', [CheckoutController::class, 'createCompanyForm'])->name('checkout.company.create');

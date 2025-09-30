@@ -4,41 +4,42 @@ namespace App\Http\Controllers\Buyer;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Company;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Validation\Rules\Password; // <-- Pastikan ini di-import
 
 class AuthController extends Controller
 {
     /**
      * Display the buyer login view.
      */
-    public function showLoginForm(Request $request) // <-- Modifikasi: Tambahkan Request $request
+    public function showLoginForm(Request $request)
     {
-        // --- LOGIKA BARU DITAMBAHKAN ---
-        // Cek apakah ada parameter 'source' dari URL
+        // Logika untuk redirect dari navbar
         if ($request->has('source') && $request->source === 'navbar') {
-            // Jika iya, simpan tujuan redirect di session
             Session::put('login_redirect_target', 'welcome');
         } else {
-            // Jika tidak, hapus session agar tidak mengganggu proses intended()
             Session::forget('login_redirect_target');
         }
-        // ------------------------------
-
         return view('buyer.login');
     }
 
-    // ... (metode showProfile dan updateProfile tidak berubah) ...
+    /**
+     * Menampilkan halaman profil buyer beserta data perusahaan.
+     */
     public function showProfile()
     {
-        $user = auth()->user();
-        return view('buyer.profile', compact('user'));
+        $user = Auth::user();
+        $company = $user->company; // Mengambil data relasi
+
+        // Mengirim 'user' dan 'company' ke view
+        return view('buyer.profile', compact('user', 'company'));
     }
 
     /**
@@ -46,14 +47,11 @@ class AuthController extends Controller
      */
     public function updateProfile(Request $request)
     {
-        // 1. Ambil pengguna yang sedang login
         $user = Auth::user();
 
-        // 2. Validasi data yang masuk
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:15',
-            // Pastikan validasi NIK unik, tapi abaikan NIK milik pengguna saat ini
             'nik' => ['required', 'string', 'digits:16', Rule::unique('users')->ignore($user->id)],
             'address' => 'required|string|max:255',
             'province' => 'required|string|max:255',
@@ -62,11 +60,36 @@ class AuthController extends Controller
             'village' => 'required|string|max:255',
         ]);
 
-        // 3. Update data pengguna di database
         $user->update($validatedData);
 
-        // 4. Kembalikan ke halaman profil dengan pesan sukses
+        // Arahkan kembali ke showProfile untuk memuat ulang semua data
         return redirect()->route('buyer.profile.show')->with('success', 'Profil Anda berhasil diperbarui!');
+    }
+
+    /**
+     * Memperbarui informasi profil perusahaan.
+     */
+    public function updateCompanyProfile(Request $request)
+    {
+        $validatedData = $request->validate([
+            'company_name' => 'required|string|max:255',
+            'company_address' => 'required|string|max:255',
+            'company_phone_number' => 'required|string|max:20',
+            'company_nib' => 'required|string|max:255',
+        ]);
+
+        Auth::user()->company()->updateOrCreate(
+            ['user_id' => Auth::id()],
+            [
+                'name' => $validatedData['company_name'],
+                'address' => $validatedData['company_address'],
+                'phone_number' => $validatedData['company_phone_number'],
+                'nib' => $validatedData['company_nib'],
+            ]
+        );
+
+        // Arahkan kembali ke showProfile untuk memuat ulang semua data
+        return redirect()->route('buyer.profile.show')->with('success', 'Data perusahaan berhasil diperbarui!');
     }
 
     /**
@@ -76,7 +99,6 @@ class AuthController extends Controller
     {
         $user = Auth::user();
 
-        // Validasi
         $request->validate([
             'current_password' => ['required', function ($attribute, $value, $fail) use ($user) {
                 if (!Hash::check($value, $user->password)) {
@@ -86,11 +108,11 @@ class AuthController extends Controller
             'new_password' => ['required', 'string', Password::min(8)->mixedCase()->numbers(), 'confirmed'],
         ]);
 
-        // Update password
         $user->update([
             'password' => Hash::make($request->new_password)
         ]);
 
+        // Arahkan kembali ke showProfile untuk memuat ulang semua data
         return redirect()->route('buyer.profile.show')->with('success', 'Password Anda berhasil diubah!');
     }
 
@@ -108,19 +130,14 @@ class AuthController extends Controller
             $request->session()->regenerate();
 
             if (Auth::user()->role === 'buyer') {
-
-                // --- LOGIKA REDIRECT BARU DITAMBAHKAN ---
-                // Cek apakah ada session tujuan redirect dari navbar
+                // Logika redirect baru dari navbar
                 if (Session::has('login_redirect_target') && Session::get('login_redirect_target') === 'welcome') {
-                    // Hapus session agar tidak digunakan lagi
                     Session::forget('login_redirect_target');
-                    // Arahkan ke route 'welcome'
                     return redirect()->route('welcome');
                 }
-                // ----------------------------------------
-
-                // Jika tidak ada session, gunakan intended() seperti biasa
-                return redirect()->intended(route('buyer.categoryselect')); // <-- Gunakan helper route() untuk keamanan
+                
+                // Redirect default
+                return redirect()->intended(route('buyer.categoryselect'));
 
             } else {
                 Auth::logout();
@@ -173,13 +190,13 @@ class AuthController extends Controller
             'district' => $request->district,
             'village' => $request->village,
             'password' => Hash::make($request->password),
-            'role' => 'buyer', // Pastikan ini sesuai dengan sistem role Anda
+            'role' => 'buyer',
         ]);
 
         event(new Registered($user));
         Auth::login($user);
 
-        return redirect('/'); // Atau ke halaman yang lebih sesuai setelah registrasi buyer
+        return redirect('/');
     }
 
     /**

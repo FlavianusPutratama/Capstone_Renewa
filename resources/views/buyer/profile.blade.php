@@ -15,8 +15,6 @@
     
     <style>
         html { scroll-behavior: smooth; }
-        [data-aos] { pointer-events: none; }
-        [data-aos].aos-animate { pointer-events: auto; }
         .navbar-scrolled { backdrop-filter: blur(10px); background-color: rgba(255, 255, 255, 0.9); transition: all 0.3s ease; }
         .glass-card { background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2); }
         .modern-input, .modern-select { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(8px); border: 1px solid rgba(229, 231, 235, 0.6); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -39,9 +37,22 @@
                 </div>
             @endif
 
-            @if(session('error'))
-                <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center" data-aos="fade-down">
-                    <i class="fas fa-exclamation-triangle mr-2"></i>{{ session('error') }}
+            @if(session('error') || $errors->any())
+                <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm" data-aos="fade-down">
+                    <div class="flex">
+                        <i class="fas fa-exclamation-triangle mr-2 mt-1"></i>
+                        <div>
+                            <p class="font-bold">Terjadi Kesalahan</p>
+                            <ul class="list-disc pl-5">
+                                @if(session('error'))
+                                    <li>{{ session('error') }}</li>
+                                @endif
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             @endif
 
@@ -54,7 +65,8 @@
                         <i class="fas fa-edit mr-2"></i>Edit Profil
                     </button>
                 </div>
-
+                
+                {{-- Form Profil Personal --}}
                 <form id="profileForm" action="{{ route('buyer.profile.update') }}" method="POST" class="space-y-8">
                     @csrf
                     
@@ -63,8 +75,8 @@
                         <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
                             <i class="fas fa-user mr-3 text-green-600"></i>Informasi Pribadi
                         </h3>
-                        
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {{-- Fields for name, email, phone, NIK --}}
                             <div class="space-y-2">
                                 <label class="block text-sm font-semibold text-gray-700">Nama Lengkap</label>
                                 <input type="text" name="name" class="modern-input w-full px-4 py-3 rounded-xl focus:outline-none" value="{{ $user->name }}" disabled>
@@ -90,11 +102,12 @@
                             <i class="fas fa-map-marker-alt mr-3 text-green-600"></i>Informasi Alamat
                         </h3>
                         <div class="space-y-6">
-                            <div class="space-y-2">
+                             <div class="space-y-2">
                                 <label class="block text-sm font-semibold text-gray-700">Nama Jalan/No. Rumah</label>
                                 <input type="text" name="address" class="modern-input w-full px-4 py-3 rounded-xl focus:outline-none" value="{{ $user->address }}" disabled>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {{-- Dropdowns for province, regency, district, village --}}
                                 <div class="space-y-2">
                                     <label class="block text-sm font-semibold text-gray-700">Provinsi</label>
                                     <select name="province" id="province" class="modern-select w-full px-4 py-3 rounded-xl focus:outline-none" disabled>
@@ -122,23 +135,52 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="flex justify-between items-center pt-6 border-t border-gray-200">
-                        <button type="button" id="changePasswordButton" class="text-green-600 hover:text-green-700 font-medium transition-colors flex items-center">
-                            <i class="fas fa-key mr-2"></i>Ubah Password
-                        </button>
-                        <div class="hidden" id="saveButtonContainer">
-                            <button type="submit" class="modern-btn px-8 py-3 rounded-xl font-semibold text-white flex items-center">
-                                <i class="fas fa-save mr-2"></i>Simpan Perubahan
-                            </button>
-                        </div>
-                    </div>
                 </form>
+
+                {{-- Informasi Perusahaan --}}
+                <div class="mt-8 pt-8 border-t border-gray-200">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-building mr-3 text-green-600"></i>Informasi Perusahaan
+                    </h3>
+                    <form id="companyProfileForm" action="{{ route('buyer.profile.updateCompany') }}" method="POST" class="space-y-6">
+                        @csrf
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-gray-700">Nama Perusahaan</label>
+                                <input type="text" name="company_name" class="modern-input w-full px-4 py-3 rounded-xl focus:outline-none" value="{{ optional($company)->name }}" disabled>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-gray-700">Nomor Telepon Perusahaan</label>
+                                <input type="text" name="company_phone_number" class="modern-input w-full px-4 py-3 rounded-xl focus:outline-none" value="{{ optional($company)->phone_number }}" disabled>
+                            </div>
+                            <div class="md:col-span-2 space-y-2">
+                                <label class="block text-sm font-semibold text-gray-700">Alamat Perusahaan</label>
+                                <input type="text" name="company_address" class="modern-input w-full px-4 py-3 rounded-xl focus:outline-none" value="{{ optional($company)->address }}" disabled>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-gray-700">NIB</label>
+                                <input type="text" name="company_nib" class="modern-input w-full px-4 py-3 rounded-xl focus:outline-none" value="{{ optional($company)->nib }}" disabled>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="flex justify-between items-center pt-8 mt-8 border-t border-gray-200">
+                    <button type="button" id="changePasswordButton" class="text-green-600 hover:text-green-700 font-medium transition-colors flex items-center">
+                        <i class="fas fa-key mr-2"></i>Ubah Password
+                    </button>
+                    <div class="hidden" id="saveButtonContainer">
+                        <button type="button" id="saveButton" class="modern-btn px-8 py-3 rounded-xl font-semibold text-white flex items-center">
+                            <i class="fas fa-save mr-2"></i>Simpan Perubahan
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
 
-    <div id="passwordModal" class="fixed inset-0 z-50 flex items-center justify-center modal-overlay hidden">
+    {{-- Modal Ubah Password --}}
+    <div id="passwordModal" class="fixed inset-0 z-50 flex items-center justify-center modal-overlay hidden opacity-0">
         <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md m-4 transform transition-all duration-300 scale-95 opacity-0" id="passwordModalCard">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-gray-800">Ubah Password</h3>
@@ -149,16 +191,10 @@
                 <div class="space-y-2">
                     <label for="current_password" class="block text-sm font-semibold text-gray-700">Password Lama</label>
                     <input type="password" name="current_password" id="current_password" class="modern-input w-full px-4 py-3 rounded-xl" required>
-                    @error('current_password')
-                        <p class="text-red-500 text-sm">{{ $message }}</p>
-                    @enderror
                 </div>
                 <div class="space-y-2">
                     <label for="new_password" class="block text-sm font-semibold text-gray-700">Password Baru</label>
                     <input type="password" name="new_password" id="new_password" class="modern-input w-full px-4 py-3 rounded-xl" required>
-                     @error('new_password')
-                        <p class="text-red-500 text-sm">{{ $message }}</p>
-                    @enderror
                 </div>
                 <div class="space-y-2">
                     <label for="new_password_confirmation" class="block text-sm font-semibold text-gray-700">Konfirmasi Password Baru</label>
@@ -175,325 +211,176 @@
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     
     <script>
-    // Initialize AOS
-    AOS.init({
-        duration: 800,
-        easing: 'ease-in-out',
-        once: true,
-        mirror: false,
-        offset: 50,
-        delay: 0,
-    });
+        document.addEventListener('DOMContentLoaded', function() {
+            AOS.init({
+                duration: 800,
+                easing: 'ease-in-out',
+                once: true,
+                mirror: false,
+                offset: 50,
+            });
 
-    // Navbar scroll effect
-    window.addEventListener('scroll', function() {
-        const navbar = document.getElementById('navbar');
-        if (window.scrollY > 50) {
-            navbar.classList.add('navbar-scrolled');
-        } else {
-            navbar.classList.remove('navbar-scrolled');
-        }
-    });
+            // Navbar scroll effect
+            window.addEventListener('scroll', function() {
+                const navbar = document.getElementById('navbar');
+                if (window.scrollY > 50) {
+                    navbar.classList.add('navbar-scrolled');
+                } else {
+                    navbar.classList.remove('navbar-scrolled');
+                }
+            });
 
-    // User data from server
-    const userData = {
-        province: '{{ $user->province }}',
-        regency: '{{ $user->regency }}',
-        district: '{{ $user->district }}',
-        village: '{{ $user->village }}'
-    };
+            // User data for address dropdowns
+            const userData = {
+                province: '{{ $user->province }}',
+                regency: '{{ $user->regency }}',
+                district: '{{ $user->district }}',
+                village: '{{ $user->village }}'
+            };
 
-    let provincesData = {};
-    let regenciesData = {};
-    let districtsData = {};
-    let isEditMode = false;
+            let isEditMode = false;
 
-    // Show notification function
-    function showNotification(message, type = 'error') {
-        const notification = document.createElement('div');
-        notification.className = `fixed top-4 right-4 p-4 rounded-xl text-white font-semibold z-50 transform transition-all duration-300 ${
-            type === 'error' ? 'bg-red-500' : 'bg-green-500'
-        }`;
-        notification.innerHTML = `
-            <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'} mr-2"></i>
-            ${message}
-        `;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.style.transform = 'translateX(0)';
-        }, 100);
-        
-        setTimeout(() => {
-            notification.style.transform = 'translateX(100%)';
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
-    }
-
-    // Fetch and populate provinces
-    async function fetchProvinces() {
-        try {
-            const response = await fetch('https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json');
-            const provinces = await response.json();
-            provincesData = provinces;
-            
             const provinceSelect = document.getElementById('province');
-            provinceSelect.innerHTML = '<option value="">Pilih Provinsi</option>';
-            
-            provinces.forEach(province => {
-                const option = document.createElement('option');
-                option.value = province.name;
-                option.textContent = province.name;
-                option.dataset.id = province.id;
-                provinceSelect.appendChild(option);
-            });
-
-            if (userData.province) {
-                provinceSelect.value = userData.province;
-                const selectedProvince = provinces.find(p => p.name === userData.province);
-                if (selectedProvince) {
-                    await fetchRegencies(selectedProvince.id);
-                }
-            }
-        } catch (error) {
-            console.error('Error fetching provinces:', error);
-            showNotification('Gagal memuat data provinsi', 'error');
-        }
-    }
-
-    // Fetch and populate regencies
-    async function fetchRegencies(provinceId) {
-        try {
-            const response = await fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${provinceId}.json`);
-            const regencies = await response.json();
-            regenciesData = regencies;
-            
             const regencySelect = document.getElementById('regency');
-            regencySelect.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
-            
-            regencies.forEach(regency => {
-                const option = document.createElement('option');
-                option.value = regency.name;
-                option.textContent = regency.name;
-                option.dataset.id = regency.id;
-                regencySelect.appendChild(option);
-            });
-
-            regencySelect.disabled = !isEditMode;
-
-            if (userData.regency) {
-                regencySelect.value = userData.regency;
-                const selectedRegency = regencies.find(r => r.name === userData.regency);
-                if (selectedRegency) {
-                    await fetchDistricts(selectedRegency.id);
-                }
-            }
-        } catch (error) {
-            console.error('Error fetching regencies:', error);
-            showNotification('Gagal memuat data kabupaten/kota', 'error');
-        }
-    }
-
-    // Fetch and populate districts
-    async function fetchDistricts(regencyId) {
-        try {
-            const response = await fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/districts/${regencyId}.json`);
-            const districts = await response.json();
-            districtsData = districts;
-            
             const districtSelect = document.getElementById('district');
-            districtSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
-            
-            districts.forEach(district => {
-                const option = document.createElement('option');
-                option.value = district.name;
-                option.textContent = district.name;
-                option.dataset.id = district.id;
-                districtSelect.appendChild(option);
-            });
+            const villageSelect = document.getElementById('village');
 
-            districtSelect.disabled = !isEditMode;
+            async function fetchAndSet(selectElement, url, selectedValue, nextFetchFn, nextParam) {
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    const data = await response.json();
 
-            if (userData.district) {
-                districtSelect.value = userData.district;
-                const selectedDistrict = districts.find(d => d.name === userData.district);
-                if (selectedDistrict) {
-                    await fetchVillages(selectedDistrict.id);
+                    selectElement.innerHTML = `<option value="">Pilih ${selectElement.id.charAt(0).toUpperCase() + selectElement.id.slice(1)}</option>`;
+                    data.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item.name;
+                        option.textContent = item.name;
+                        option.dataset.id = item.id;
+                        selectElement.appendChild(option);
+                    });
+
+                    if (selectedValue) {
+                        selectElement.value = selectedValue;
+                    }
+
+                    if (nextFetchFn && selectElement.value) {
+                         const selectedOption = Array.from(selectElement.options).find(opt => opt.value === selectedValue);
+                         if(selectedOption) {
+                             await nextFetchFn(selectedOption.dataset.id);
+                         }
+                    }
+                } catch (error) {
+                    console.error(`Error fetching ${selectElement.id}:`, error);
                 }
             }
-        } catch (error) {
-            console.error('Error fetching districts:', error);
-            showNotification('Gagal memuat data kecamatan', 'error');
-        }
-    }
+            
+            async function fetchVillages(districtId) {
+                await fetchAndSet(villageSelect, `https://www.emsifa.com/api-wilayah-indonesia/api/villages/${districtId}.json`, userData.village);
+            }
 
-    // Fetch and populate villages
-    async function fetchVillages(districtId) {
-        try {
-            const response = await fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/villages/${districtId}.json`);
-            const villages = await response.json();
+            async function fetchDistricts(regencyId) {
+                await fetchAndSet(districtSelect, `https://www.emsifa.com/api-wilayah-indonesia/api/districts/${regencyId}.json`, userData.district, fetchVillages);
+            }
+
+            async function fetchRegencies(provinceId) {
+                await fetchAndSet(regencySelect, `https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${provinceId}.json`, userData.regency, fetchDistricts);
+            }
+
+            async function fetchProvinces() {
+                await fetchAndSet(provinceSelect, 'https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json', userData.province, fetchRegencies);
+            }
             
-            const villageSelect = document.getElementById('village');
-            villageSelect.innerHTML = '<option value="">Pilih Kelurahan</option>';
-            
-            villages.forEach(village => {
-                const option = document.createElement('option');
-                option.value = village.name;
-                option.textContent = village.name;
-                villageSelect.appendChild(option);
+            // Chain event listeners
+            provinceSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                fetchRegencies(selectedOption.dataset.id);
+            });
+            regencySelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                fetchDistricts(selectedOption.dataset.id);
+            });
+            districtSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                fetchVillages(selectedOption.dataset.id);
             });
 
-            villageSelect.disabled = !isEditMode;
-
-            if (userData.village) {
-                villageSelect.value = userData.village;
-            }
-        } catch (error) {
-            console.error('Error fetching villages:', error);
-            showNotification('Gagal memuat data kelurahan', 'error');
-        }
-    }
-
-    // Event listeners for dropdown changes
-    document.getElementById('province').addEventListener('change', async function() {
-        const selectedOption = this.options[this.selectedIndex];
-        const provinceId = selectedOption.dataset.id;
-        
-        document.getElementById('regency').innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
-        document.getElementById('district').innerHTML = '<option value="">Pilih Kecamatan</option>';
-        document.getElementById('village').innerHTML = '<option value="">Pilih Kelurahan</option>';
-        
-        document.getElementById('regency').disabled = true;
-        document.getElementById('district').disabled = true;
-        document.getElementById('village').disabled = true;
-
-        if (provinceId) {
-            await fetchRegencies(provinceId);
-        }
-    });
-
-    document.getElementById('regency').addEventListener('change', async function() {
-        const selectedOption = this.options[this.selectedIndex];
-        const regencyId = selectedOption.dataset.id;
-        
-        document.getElementById('district').innerHTML = '<option value="">Pilih Kecamatan</option>';
-        document.getElementById('village').innerHTML = '<option value="">Pilih Kelurahan</option>';
-        
-        document.getElementById('district').disabled = true;
-        document.getElementById('village').disabled = true;
-
-        if (regencyId) {
-            await fetchDistricts(regencyId);
-        }
-    });
-
-    document.getElementById('district').addEventListener('change', async function() {
-        const selectedOption = this.options[this.selectedIndex];
-        const districtId = selectedOption.dataset.id;
-        
-        document.getElementById('village').innerHTML = '<option value="">Pilih Kelurahan</option>';
-        document.getElementById('village').disabled = true;
-
-        if (districtId) {
-            await fetchVillages(districtId);
-        }
-    });
-
-    // Edit button functionality
-    document.getElementById('editButton').addEventListener('click', function() {
-        isEditMode = !isEditMode;
-        const inputs = document.querySelectorAll('#profileForm input, #profileForm select');
-        const saveButton = document.getElementById('saveButtonContainer');
-        
-        inputs.forEach(input => {
-            input.disabled = !isEditMode;
-        });
-        
-        if (isEditMode) {
-            this.innerHTML = '<i class="fas fa-times mr-2"></i>Batal';
-            this.className = 'px-4 py-2 bg-red-100 hover:bg-red-200 rounded-xl transition-colors flex items-center text-red-700';
-            saveButton.classList.remove('hidden');
-        } else {
-            this.innerHTML = '<i class="fas fa-edit mr-2"></i>Edit Profil';
-            this.className = 'px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors flex items-center';
-            saveButton.classList.add('hidden');
-            
-            document.querySelector('input[name="name"]').value = '{{ $user->name }}';
-            document.querySelector('input[name="email"]').value = '{{ $user->email }}';
-            document.querySelector('input[name="phone"]').value = '{{ $user->phone }}';
-            document.querySelector('input[name="nik"]').value = '{{ $user->nik }}';
-            document.querySelector('input[name="address"]').value = '{{ $user->address }}';
-            
+            // Initial fetch
             fetchProvinces();
-        }
-    });
 
-    // Form submission with validation
-    document.getElementById('profileForm').addEventListener('submit', function(e) { /* ... (kode tidak berubah) ... */ });
 
-    // Initialize page
-    document.addEventListener('DOMContentLoaded', function() {
-        fetchProvinces();
-        
-        const successAlert = document.querySelector('.bg-green-50');
-        if (successAlert) {
-            setTimeout(() => {
-                successAlert.style.opacity = '0';
-                setTimeout(() => successAlert.remove(), 300);
-            }, 5000);
-        }
-    });
+            // Edit/Save functionality
+            const editButton = document.getElementById('editButton');
+            const saveButtonContainer = document.getElementById('saveButtonContainer');
+            const saveButton = document.getElementById('saveButton');
+            
+            const allInputs = document.querySelectorAll('#profileForm input, #profileForm select, #companyProfileForm input');
 
-    // Phone & NIK formatting
-    document.querySelector('input[name="phone"]').addEventListener('input', function(e) { /* ... (kode tidak berubah) ... */ });
-    document.querySelector('input[name="nik"]').addEventListener('input', function(e) { /* ... (kode tidak berubah) ... */ });
-    const inputs = document.querySelectorAll('input, select');
-    inputs.forEach(input => { /* ... (kode tidak berubah) ... */ });
+            editButton.addEventListener('click', function() {
+                isEditMode = !isEditMode;
+                allInputs.forEach(input => input.disabled = !isEditMode);
+                
+                if (isEditMode) {
+                    this.innerHTML = '<i class="fas fa-times mr-2"></i>Batal';
+                    this.className = 'px-4 py-2 bg-red-100 hover:bg-red-200 rounded-xl transition-colors flex items-center text-red-700';
+                    saveButtonContainer.classList.remove('hidden');
+                } else {
+                    // Reset all forms
+                    document.getElementById('profileForm').reset();
+                    document.getElementById('companyProfileForm').reset();
+                    // Set values back to original from server
+                    document.querySelector('input[name="name"]').value = '{{ $user->name }}';
+                    document.querySelector('input[name="email"]').value = '{{ $user->email }}';
+                    document.querySelector('input[name="phone"]').value = '{{ $user->phone }}';
+                    document.querySelector('input[name="nik"]').value = '{{ $user->nik }}';
+                    document.querySelector('input[name="address"]').value = '{{ $user->address }}';
+                    document.querySelector('input[name="company_name"]').value = '{{ optional($company)->name }}';
+                    document.querySelector('input[name="company_phone_number"]').value = '{{ optional($company)->phone_number }}';
+                    document.querySelector('input[name="company_address"]').value = '{{ optional($company)->address }}';
+                    document.querySelector('input[name="company_nib"]').value = '{{ optional($company)->nib }}';
+                    
+                    this.innerHTML = '<i class="fas fa-edit mr-2"></i>Edit Profil';
+                    this.className = 'px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors flex items-center';
+                    saveButtonContainer.classList.add('hidden');
+                    fetchProvinces(); // Re-fetch and set address
+                }
+            });
 
-    // --- PERUBAHAN 3: SCRIPT UNTUK MODAL ---
-    const passwordModal = document.getElementById('passwordModal');
-    const passwordModalCard = document.getElementById('passwordModalCard');
-    const changePasswordButton = document.getElementById('changePasswordButton');
-    const closeModalButton = document.getElementById('closeModalButton');
-    const cancelPasswordChange = document.getElementById('cancelPasswordChange');
+            saveButton.addEventListener('click', function() {
+                document.getElementById('profileForm').submit();
+                document.getElementById('companyProfileForm').submit();
+            });
 
-    function openPasswordModal() {
-        passwordModal.classList.remove('hidden');
-        setTimeout(() => {
-            passwordModal.classList.remove('opacity-0');
-            passwordModalCard.classList.remove('scale-95', 'opacity-0');
-            passwordModalCard.classList.add('scale-100', 'opacity-100');
-        }, 10); // small delay to allow CSS transition
-    }
 
-    function closePasswordModal() {
-        passwordModalCard.classList.remove('scale-100', 'opacity-100');
-        passwordModalCard.classList.add('scale-95', 'opacity-0');
-        passwordModal.classList.add('opacity-0');
-        setTimeout(() => {
-            passwordModal.classList.add('hidden');
-        }, 300); // match transition duration
-    }
+            // Password Modal
+            const passwordModal = document.getElementById('passwordModal');
+            const passwordModalCard = document.getElementById('passwordModalCard');
+            const changePasswordButton = document.getElementById('changePasswordButton');
+            const closeModalButton = document.getElementById('closeModalButton');
+            const cancelPasswordChange = document.getElementById('cancelPasswordChange');
 
-    changePasswordButton.addEventListener('click', openPasswordModal);
-    closeModalButton.addEventListener('click', closePasswordModal);
-    cancelPasswordChange.addEventListener('click', closePasswordModal);
+            function openPasswordModal() {
+                passwordModal.classList.remove('hidden');
+                setTimeout(() => {
+                    passwordModal.classList.remove('opacity-0');
+                    passwordModalCard.classList.remove('scale-95', 'opacity-0');
+                    passwordModalCard.classList.add('scale-100', 'opacity-100');
+                }, 10);
+            }
 
-    // Close modal on escape key press
-    window.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && !passwordModal.classList.contains('hidden')) {
-            closePasswordModal();
-        }
-    });
+            function closePasswordModal() {
+                passwordModalCard.classList.remove('scale-100', 'opacity-100');
+                passwordModalCard.classList.add('scale-95', 'opacity-0');
+                passwordModal.classList.add('opacity-0');
+                setTimeout(() => passwordModal.classList.add('hidden'), 300);
+            }
 
-    // Close modal on overlay click
-    passwordModal.addEventListener('click', (e) => {
-        if (e.target === passwordModal) {
-            closePasswordModal();
-        }
-    });
-
+            changePasswordButton.addEventListener('click', openPasswordModal);
+            closeModalButton.addEventListener('click', closePasswordModal);
+            cancelPasswordChange.addEventListener('click', closePasswordModal);
+            window.addEventListener('keydown', (e) => (e.key === 'Escape' && !passwordModal.classList.contains('hidden')) && closePasswordModal());
+            passwordModal.addEventListener('click', (e) => (e.target === passwordModal) && closePasswordModal());
+        });
     </script>
 </body>
 </html>
